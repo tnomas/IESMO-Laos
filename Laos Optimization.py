@@ -62,18 +62,22 @@ model.UsageWater = Var(model.T, bounds = (0,Storage)) #used M^3 Water @ hour X
 
 #Objective Function
 def obj_rule(model):
-        return(model.Cwind * model.Pwind + model.Cpv * model.Ppv)
+        return(model.Cwind * model.Pwind + model.Cpv * model.Ppv + sum((model.UsageWater[i] for i in model.T)) * TurbineLimit * Cwater)
 
 model.cost = Objective(sense=minimize, rule=obj_rule)
 
 #Constraints
 #MW(installed Wind) * Possible Usage(Wind) + MW(installed PV) + Possible Usage(PV) + 
-def demand_rule(model, i):
-    return ((model.Pwind * model.FactorWind[i] + model.Ppv * model.FactorPv[i]) >= model.DemandEnergy[i])
+def DemandEnergy_rule(model, i):
+    return ((model.Pwind * model.FactorWind[i] + model.Ppv * model.FactorPv[i] + model.UsageWater[i] * TurbineLimit) >= model.DemandEnergy[i])
     
-model.demand = Constraint(model.T, rule=demand_rule)
+model.Energy = Constraint(model.T, rule=DemandEnergy_rule)
 
 #Fulfill Drink Water Demand hourly
+def DemandWater_rule(model, i):
+    return(Storage>=model.DemandWater)
+
+model.Drinkwater = Constraint(model.T, rule=DemandWater_rule)
 #Limitation by Water Turbine
 
 #Solver
@@ -94,4 +98,4 @@ print("PV installiert:", model.Ppv.value)
 for i in model.T:
     print("Stunde", i)
     print("Demand:",model.DemandEnergy[i], "MWh")
-    print("Zusammensetzung:", model.FactorPv[i]*model.Ppv.value, "aus PV,", model.FactorWind[i]*model.Pwind.value, "aus Wind")
+    print("Zusammensetzung:", model.FactorPv[i]*model.Ppv.value, "aus PV,", model.FactorWind[i]*model.Pwind.value, "aus Wind,", model.UsageWater[i].value*TurbineLimit, "aus Wasser")
