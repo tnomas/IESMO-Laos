@@ -24,7 +24,7 @@ FactorWind = [0.5, 0.3, 0.1, 0.6, 0.2] #Wind Factor @ hour X
 #PV
 CostPv = 800000 #€/MWp
 LifetimePv= 30 #a
-FactorPv = [0.1, 0.3, 0.8, 0.4, 0] #Radiation Factor @ hour X
+FactorPv = [0.2, 0.3, 0.8, 0.4, 0] #Radiation Factor @ hour X
 
 #Water
 Storage = 5000 #m^3 in Storage, hourly correction
@@ -62,7 +62,7 @@ model.UsageWater = Var(model.T, bounds = (0,Storage)) #used M^3 Water @ hour X
 
 #Objective Function
 def obj_rule(model):
-        return(model.Cwind * model.Pwind + model.Cpv * model.Ppv + )
+        return(model.Cwind * model.Pwind + model.Cpv * model.Ppv)
 
 model.cost = Objective(sense=minimize, rule=obj_rule)
 
