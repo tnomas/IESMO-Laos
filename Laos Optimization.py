@@ -28,7 +28,7 @@ FactorPv = [0.2, 0.3, 0.8, 0.4, 0.02] #Radiation Factor @ hour X
 
 #Water
 Storage = 10000000 #m^3 in Storage, hourly correction
-Pwater = 0.001 #MW/m^3
+Pwater = 0.001 #MWh/m^3
 TurbineLimit = 480 #MW
 InflowRain = 40 #m^3 @ hour X
 InflowRiver = 200 #m^3 @ hour X
@@ -39,9 +39,9 @@ DemandWater = [200, 300, 400, 301, 100] #m^3/h @ hour X
 
 ''' ------------COST------------ '''
 #Costcalculation
-Cwind = CostWind #Cost/MW Wind, 1 year only
-Cpv = CostPv #Cost/MW PV, 1 year only
-Cwater = 1 #€/MWh
+Cwind = CostWind #€/MW Wind, 1 year only
+Cpv = CostPv #€/MW PV, 1 year only
+Cwater = 10000 #€/MWh
 
 ''' ------------MODEL CONSTRUCTION------------ '''
 model = ConcreteModel()
@@ -54,7 +54,7 @@ model.FactorWind = Set(initialize=FactorWind, ordered = True)
 model.FactorPv = Set(initialize=FactorPv, ordered = True)
 model.Cwind = Param(initialize=Cwind) #Possible MWh by Wind @ hour X
 model.Cpv = Param(initialize=Cpv) #Possible MWh by PV @ hour X
-#model.Cwater = Param(initialize=Cwater)
+model.Cwater = Param(initialize=Cwater)
 #model.Storage = Param(initialize=Storage, mutable = True)
 model.TurbineLimit = Param(initialize=TurbineLimit)
 model.Pwater = Param(initialize=Pwater)
@@ -66,16 +66,17 @@ model.UsageWater = Var(model.T, domain=NonNegativeReals) #used M^3 Water @ hour 
 
 ''' ----------Constraint & Objective ------------ '''
 #------Objective Function-------
+#€/MW * MW + €/MW + m^3 * MWh/m^3 * €/MWh
 def obj_rule(model):
-        return(model.Cwind * model.Pwind + model.Cpv * model.Ppv + sum(model.UsageWater[i] for i in model.T) * Pwater * Cwater)
+        return(model.Cwind * model.Pwind + model.Cpv * model.Ppv + sum((model.UsageWater[i] * model.Pwater * model.Cwater) for i in model.T))
 model.cost = Objective(sense=minimize, rule=obj_rule)
 
 
 #----CONSTRAINTS-------
 #Power of Wind * WindFactor + PV * PVFactor + Waterused @ hour X * Pwater must be bigger than Energy Demand
 def DemandEnergy_rule(model, i):
-    return (model.Ppv * model.FactorPv[i] + model.Pwind * model.FactorWind[i] + model.UsageWater[i] * Pwater >= model.DemandEnergy[i])
-model.Energy = Constraint(model.T, rule=DemandEnergy_rule)
+    return (model.Pwind * model.FactorWind[i] + model.Ppv * model.FactorPv[i] + model.UsageWater[i] * Pwater >= model.DemandEnergy[i])
+model.EnergyDemand = Constraint(model.T, rule=DemandEnergy_rule)
 
 
 #Limitation through Water Turbine
