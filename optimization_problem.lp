@@ -2,27 +2,22 @@
 
 min 
 cost:
-+400000 Ppv
++1000000 Ppv
 +1000000 Pwind
-+10 UsageWater(1)
-+10 UsageWater(2)
-+10 UsageWater(3)
-+10 UsageWater(4)
-+10 UsageWater(5)
 
 s.t.
 
 c_l_EnergyDemand(1)_:
-+0.20000000000000001 Ppv
++0.5 Ppv
 +0.5 Pwind
 +0.001 UsageWater(1)
->= 500
+>= 400
 
 c_l_EnergyDemand(2)_:
 +0.29999999999999999 Ppv
 +0.29999999999999999 Pwind
 +0.001 UsageWater(2)
->= 400
+>= 500
 
 c_l_EnergyDemand(3)_:
 +0.80000000000000004 Ppv
@@ -37,7 +32,6 @@ c_l_EnergyDemand(4)_:
 >= 450
 
 c_l_EnergyDemand(5)_:
-+0.02 Ppv
 +0.20000000000000001 Pwind
 +0.001 UsageWater(5)
 >= 310
