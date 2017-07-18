@@ -31,7 +31,7 @@ LifetimePv= 30 #a
 FactorPv = [0.5, 0.3, 0.8, 0.4, 0.0] #Radiation Factor @ hour X
 
 #Water
-StorageSize = 20000
+StorageSize = 1500
 StorageVariable = [StorageSize for i in range(0,len(T)+1)] #m^3 in Storage, hourly correction
 Pwater = 0.001 #MWh/m^3
 TurbineLimit = 480 #MW
@@ -56,12 +56,12 @@ Cwater = 0 #€/MWh
 #Parameter
 model.DemandWater = Set(initialize=DemandWater, ordered=True) #Water demand @ hour x
 model.DemandEnergy = Set(initialize=DemandEnergy, ordered=True) #Energy demand @ hour X
-model.FactorWind = Set(initialize=FactorWind, ordered = True)
-model.FactorPv = Set(initialize=FactorPv, ordered = True)
-model.Cwind = Param(initialize=Cwind) #Possible MWh by Wind @ hour X
-model.Cpv = Param(initialize=Cpv) #Possible MWh by PV @ hour X
-model.Cwater = Param(initialize=Cwater)
-model.TurbineLimit = Param(initialize=TurbineLimit)
+model.FactorWind = Set(initialize=FactorWind, ordered = True) #Possible MWh by Wind @ hour X
+model.FactorPv = Set(initialize=FactorPv, ordered = True) #Possible MWh by PV @ hour X
+model.Cwind = Param(initialize=Cwind) #Price per MW Wind
+model.Cpv = Param(initialize=Cpv) #Price per MW PV
+model.Cwater = Param(initialize=Cwater) #Price of Water €/MWh
+model.TurbineLimit = Param(initialize=TurbineLimit) #Maximum Turbine Generation Capacity
 model.Pwater = Param(initialize=Pwater)
 
 #Variablen
@@ -76,6 +76,7 @@ model.UsageWater = Var(model.T, domain=NonNegativeReals) #used M^3 Water @ hour 
 #€/MW * MW + €/MW + m^3 * MWh/m^3 * €/MWh
 def obj_rule(model):
         return(model.Cwind * model.Pwind + model.Cpv * model.Ppv + sum((model.UsageWater[i] * model.Pwater * model.Cwater) for i in model.T))
+    
 model.cost = Objective(sense=minimize, rule=obj_rule)
 
 
@@ -83,19 +84,24 @@ model.cost = Objective(sense=minimize, rule=obj_rule)
 #Power of Wind * WindFactor + PV * PVFactor + Waterused @ hour X * Pwater must be bigger than Energy Demand
 def DemandEnergy_rule(model, i):
     return (model.Pwind * model.FactorWind[i] + model.Ppv * model.FactorPv[i] + model.UsageWater[i] * Pwater >= model.DemandEnergy[i])
+
 model.EnergyDemand = Constraint(model.T, rule=DemandEnergy_rule)
 
 
 #Limitation through Water Turbine
 def MaxWaterPower_rule(model, i):
     return(model.UsageWater[i] * model.Pwater  <= 480)
+
 model.MaxWaterPower = Constraint(model.T, rule=MaxWaterPower_rule)
 
-#--------STORAGE--------
-def WaterUsage_rule (model,i):
-    StorageVariable[i] = StorageVariable[i-1] - model.DemandWater[i] - model.UsageWater[i].value + InflowRain + InflowRiver
-    return(StorageVariable[i] >= model.Demand[i])
-model.WaterDemand = Constraint(model.T, rule=WaterUsage_rule)
+#Storage
+#for i in model.T:
+#    StorageVariable[i] = StorageVariable[i-1] - model.DemandWater[i] - model.UsageWater[i].value
+#    
+#def WaterUsage_rule (model, i):
+#    return(StorageVariable[i] >= model.DemandWater[i])
+#
+#model.WaterDemand = Constraint(model.T, rule=WaterUsage_rule)
 
 #------SOLVER---------
 opt = SolverFactory('glpk')
