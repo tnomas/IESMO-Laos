@@ -23,8 +23,6 @@ model = ConcreteModel(name='Districtheat')
 
 data = pd.read_csv('data.csv', index_col = 0)
 
-demand = pd.DataFrame()
-
 model.T = data.index
 model.demand = Param(initialize=data['demand'])
 
