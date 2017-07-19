@@ -20,7 +20,7 @@ damdata = pd.read_csv('dam.csv')
 
 model = ConcreteModel()
 model.T = data.index
-DamVariable = [1,2,3,4,5] #damdata.index
+model.DamVariableRange = Set(initialize=damdata.index) #damdata.index
 
 #==============================================================================
 # ------------Variables------------
@@ -34,8 +34,6 @@ FactorWind = data['windfactor'] #Wind Factor @ hour X
 CostPv = 1000000 #€/MWp
 LifetimePv= 20 #a
 FactorPv = [0.5, 0.3, 0.8, 0.4, 0.0] #Radiation Factor @ hour X
-
-#
 
 #Demand
 DemandFactor = data['demand']
@@ -55,7 +53,7 @@ model.Cpv = Param(initialize=CostPv/LifetimePv) #Price per MW PV
 #Variablen
 model.Pwind = Var(domain=NonNegativeReals) #installed MW Wind
 model.Ppv = Var(domain=NonNegativeReals) #installed MW Wind
-model.Dam = Var(bounds=(1,2)) #Dam Variable to choose from
+model.Dam = Var(initialize=3, within=model.DamVariableRange) #Dam Variable to choose from
 
 #==============================================================================
 # ----------Constraint & Objective & Solver------------
@@ -70,7 +68,7 @@ def pricedam(index):
         
 #Price per MW Wind * installed Wind Capacity + Price per MW Pv * installed PV capacity + Price of Dam installation
 def obj_rule(model):
-        return(model.Cwind * model.Pwind + model.Cpv * model.Ppv + pricedam(model.Dam))
+        return(model.Cwind * model.Pwind + model.Cpv * model.Ppv + damdata.loc[model.Dam,'costs'])
     
 model.cost = Objective(sense=minimize, rule=obj_rule)
 
@@ -78,7 +76,7 @@ model.cost = Objective(sense=minimize, rule=obj_rule)
 #----CONSTRAINTS-------
 #Power of Wind * WindFactor + PV * PVFactor + Waterused @ hour X * Pwater must be bigger than Energy Demand
 def DemandEnergy_rule(model, i):
-    return (model.Pwind * model.FactorWind[i] + model.Ppv * model.FactorPv[i] >= model.DemandFactor[i] * DemandTotal)
+    return (model.Pwind * model.FactorWind[i] + model.Ppv * model.FactorPv[i] + damdata.loc[model.Dam,'power'] >= model.DemandFactor[i] * DemandTotal)
 
 model.EnergyDemand = Constraint(model.T, rule=DemandEnergy_rule)
 
@@ -95,16 +93,19 @@ results = opt.solve(model, tee=True)
 print("")
 print("Wind installiert:", round(model.Pwind.value, 2), "MWh")
 print("PV installiert:", round(model.Ppv.value, 2), "MWh")
+print("Dam installiert:", damdata.loc[model.Dam,'power'])
 print("")
 for i in model.T:
     print("Stunde", i)
     print("Energy Demand:",model.DemandFactor[i] * DemandTotal, "MWh")
     print("Zusammensetzung:", 
           round(model.FactorPv[i]*model.Ppv.value,2), "MWh PV |", 
-          round(model.FactorWind[i]*model.Pwind.value,2), "MWh Wind |")
+          round(model.FactorWind[i]*model.Pwind.value,2), "MWh Wind |",
+          damdata.loc[model.Dam,'power'], "MWh Dam",)
 print("")
-print("Wind:", model.Cwind * model.Pwind.value, "€ |", model.Cwind, "€ pro MWh" )
-print("PV:", model.Cpv * model.Ppv.value, "€ |", model.Cpv, "€ pro MWh" )
+print("Wind:", model.Cwind * model.Pwind.value, "€ |", model.Cwind.value, "€ pro MWh" )
+print("PV:", model.Cpv * model.Ppv.value, "€ |", model.Cpv.value, "€ pro MWh" )
+print("Damm:", damdata.loc[model.Dam,'costs'], "€ |", damdata.loc[model.Dam,'costs']/damdata.loc[model.Dam,'power'], "€ pro MWh" )
 print("----")
 print("Gesamtkosten:", model.Cwind * model.Pwind.value + model.Cpv * model.Ppv.value)
 
