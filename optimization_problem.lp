@@ -2,9 +2,9 @@
 
 min 
 cost:
++1 Dam
 +50000 Ppv
 +50000 Pwind
-+96400000 ONE_VAR_CONSTANT
 
 s.t.
 
@@ -38,4 +38,5 @@ ONE_VAR_CONSTANT = 1.0
 bounds
    0 <= Pwind <= +inf
    0 <= Ppv <= +inf
+   1 <= Dam <= 2
 end

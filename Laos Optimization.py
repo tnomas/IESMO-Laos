@@ -21,7 +21,6 @@ damdata = pd.read_csv('dam.csv')
 model = ConcreteModel()
 model.T = data.index
 DamVariable = [1,2,3,4,5] #damdata.index
-model.DamVariables = Set(bounds=(0.1,2))
 
 #==============================================================================
 # ------------Variables------------
@@ -56,17 +55,20 @@ model.Cpv = Param(initialize=CostPv/LifetimePv) #Price per MW PV
 #Variablen
 model.Pwind = Var(domain=NonNegativeReals) #installed MW Wind
 model.Ppv = Var(domain=NonNegativeReals) #installed MW Wind
-model.Dam = Var(within=model.DamVariables) #Dam Variable to choose from
+model.Dam = Var(bounds=(1,2)) #Dam Variable to choose from
 
 #==============================================================================
 # ----------Constraint & Objective & Solver------------
 #==============================================================================
 #------Objective Function-------
-#Price per MW Wind * installed Wind Capacity + Price per MW Pv * installed PV capacity + Price of Dam installation
+
 def pricedam(index):
-    if (0 < index <= 2):
-        return(10)
-    
+#    if (0 < index <= 2):
+#        return(10)
+    #Oder das:
+    return(damdata.loc[index,'costs'])
+        
+#Price per MW Wind * installed Wind Capacity + Price per MW Pv * installed PV capacity + Price of Dam installation
 def obj_rule(model):
         return(model.Cwind * model.Pwind + model.Cpv * model.Ppv + pricedam(model.Dam))
     
