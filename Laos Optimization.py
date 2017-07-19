@@ -33,12 +33,11 @@ FactorWind = data['windfactor'] #Wind Factor @ hour X
 #PV
 CostPv = 1000000 #€/MWp
 LifetimePv= 20 #a
-FactorPv = [0.5, 0.3, 0.8, 0.4, 0.0] #Radiation Factor @ hour X
+FactorPv = data['PV_factor']#Radiation Factor @ hour X
 
 #Demand
 DemandFactor = data['demand']
 DemandTotal = 71737.392
-#[400, 500, 300, 450, 310] #MWh @ hour X
 
 #==============================================================================
 # ------------MODEL CONSTRUCTION------------
@@ -53,7 +52,7 @@ model.Cpv = Param(initialize=CostPv/LifetimePv) #Price per MW PV
 #Variablen
 model.Pwind = Var(domain=NonNegativeReals) #installed MW Wind
 model.Ppv = Var(domain=NonNegativeReals) #installed MW Wind
-model.Dam = Var(initialize=3, within=model.DamVariableRange) #Dam Variable to choose from
+model.Dam = Var(initialize=3) #Dam Variable to choose from
 
 #==============================================================================
 # ----------Constraint & Objective & Solver------------
