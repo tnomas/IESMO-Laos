@@ -6,7 +6,7 @@ Created on Thu Jul 13 17:52:14 2017
 @author: nilshoffmann
 """
 
-from pyomo.environ import ConcreteModel, Param, Var, Set, Constraint, Objective
+from pyomo.environ import ConcreteModel, Param, Var, Set, Constraint, Objective, RangeSet
 from pyomo.environ import minimize, NonNegativeReals
 from pyomo.opt import SolverFactory
 import pandas as pd
@@ -20,7 +20,7 @@ damdata = pd.read_csv('dam.csv')
 
 model = ConcreteModel()
 model.T = data.index
-model.DamVariableRange = Set(initialize=damdata.index) #damdata.index
+model.DamVariableRange = RangeSet(1,6,1) #damdata.index
 
 #==============================================================================
 # ------------Variables------------
@@ -33,7 +33,7 @@ FactorWind = data['windfactor'] #Wind Factor @ hour X
 #PV
 CostPv = 1000000 #€/MWp
 LifetimePv= 20 #a
-FactorPv = data['PV_factor']#Radiation Factor @ hour X
+FactorPv = data['pv_factor']#Radiation Factor @ hour X
 
 #Demand
 DemandFactor = data['demand']
@@ -42,28 +42,21 @@ DemandTotal = 71737.392
 #==============================================================================
 # ------------MODEL CONSTRUCTION------------
 #==============================================================================
+    
 #Parameter
-model.DemandFactor = Set(initialize=DemandFactor, ordered=True) #Energy demand @ hour X
-model.FactorWind = Set(initialize=FactorWind, ordered = True) #Possible MWh by Wind @ hour X
-model.FactorPv = Set(initialize=FactorPv, ordered = True) #Possible MWh by PV @ hour X
+model.DemandFactor = Set(initialize=DemandFactor, ordered=True) #Energy demand @ hour X #Possible MWh by Wind @ hour X
 model.Cwind = Param(initialize=CostWind/LifetimeWind) #Price per MW Wind
 model.Cpv = Param(initialize=CostPv/LifetimePv) #Price per MW PV
 
 #Variablen
 model.Pwind = Var(domain=NonNegativeReals) #installed MW Wind
 model.Ppv = Var(domain=NonNegativeReals) #installed MW Wind
-model.Dam = Var(initialize=3) #Dam Variable to choose from
+model.Dam = Var(model.DamVariableRange) #Dam Variable to choose from
 
 #==============================================================================
 # ----------Constraint & Objective & Solver------------
 #==============================================================================
 #------Objective Function-------
-
-def pricedam(index):
-#    if (0 < index <= 2):
-#        return(10)
-    #Oder das:
-    return(damdata.loc[index,'costs'])
         
 #Price per MW Wind * installed Wind Capacity + Price per MW Pv * installed PV capacity + Price of Dam installation
 def obj_rule(model):
@@ -75,7 +68,7 @@ model.cost = Objective(sense=minimize, rule=obj_rule)
 #----CONSTRAINTS-------
 #Power of Wind * WindFactor + PV * PVFactor + Waterused @ hour X * Pwater must be bigger than Energy Demand
 def DemandEnergy_rule(model, i):
-    return (model.Pwind * model.FactorWind[i] + model.Ppv * model.FactorPv[i] + damdata.loc[model.Dam,'power'] >= model.DemandFactor[i] * DemandTotal)
+    return (model.Pwind * FactorWind[i] + model.Ppv * FactorPv[i] + damdata.loc[model.Dam,'power'] >= model.DemandFactor[i] * DemandTotal)
 
 model.EnergyDemand = Constraint(model.T, rule=DemandEnergy_rule)
 
@@ -98,8 +91,8 @@ for i in model.T:
     print("Stunde", i)
     print("Energy Demand:",model.DemandFactor[i] * DemandTotal, "MWh")
     print("Zusammensetzung:", 
-          round(model.FactorPv[i]*model.Ppv.value,2), "MWh PV |", 
-          round(model.FactorWind[i]*model.Pwind.value,2), "MWh Wind |",
+          round(FactorPv[i]*model.Ppv.value,2), "MWh PV |", 
+          round(FactorWind[i]*model.Pwind.value,2), "MWh Wind |",
           damdata.loc[model.Dam,'power'], "MWh Dam",)
 print("")
 print("Wind:", model.Cwind * model.Pwind.value, "€ |", model.Cwind.value, "€ pro MWh" )
