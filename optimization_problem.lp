@@ -2,59 +2,31 @@
 
 min 
 cost:
-+1000000 Ppv
-+1000000 Pwind
++50000 Ppv
++50000 Pwind
++9640000 ONE_VAR_CONSTANT
 
 s.t.
 
 c_l_EnergyDemand(1)_:
-+0.5 Ppv
-+0.5 Pwind
-+0.001 UsageWater(1)
->= 400
++4.0048400000000001e-05 Pwind
+>= -168.39911746707841
 
 c_l_EnergyDemand(2)_:
-+0.29999999999999999 Ppv
-+0.29999999999999999 Pwind
-+0.001 UsageWater(2)
->= 500
++7.6765600000000002e-05 Pwind
+>= -168.21548409103679
 
 c_l_EnergyDemand(3)_:
-+0.80000000000000004 Ppv
-+0.10000000000000001 Pwind
-+0.001 UsageWater(3)
->= 300
++4.4193900000000004e-05 Pwind
+>= -167.7563934771936
 
 c_l_EnergyDemand(4)_:
-+0.40000000000000002 Ppv
-+0.59999999999999998 Pwind
-+0.001 UsageWater(4)
->= 450
++1.6619000000000001e-05 Pwind
+>= -167.02185279928801
 
 c_l_EnergyDemand(5)_:
-+0.20000000000000001 Pwind
-+0.001 UsageWater(5)
->= 310
-
-c_u_MaxWaterPower(1)_:
-+0.001 UsageWater(1)
-<= 480
-
-c_u_MaxWaterPower(2)_:
-+0.001 UsageWater(2)
-<= 480
-
-c_u_MaxWaterPower(3)_:
-+0.001 UsageWater(3)
-<= 480
-
-c_u_MaxWaterPower(4)_:
-+0.001 UsageWater(4)
-<= 480
-
-c_u_MaxWaterPower(5)_:
-+0.001 UsageWater(5)
-<= 480
++1.3990999999999999e-05 Pwind
+>= -166.195473912144
 
 c_e_ONE_VAR_CONSTANT: 
 ONE_VAR_CONSTANT = 1.0
@@ -62,9 +34,4 @@ ONE_VAR_CONSTANT = 1.0
 bounds
    0 <= Pwind <= +inf
    0 <= Ppv <= +inf
-   0 <= UsageWater(1) <= +inf
-   0 <= UsageWater(2) <= +inf
-   0 <= UsageWater(3) <= +inf
-   0 <= UsageWater(4) <= +inf
-   0 <= UsageWater(5) <= +inf
 end
