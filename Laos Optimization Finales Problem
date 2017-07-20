@@ -8,7 +8,6 @@ Created on Thu Jul 13 17:52:14 2017
 from pyomo.environ import ConcreteModel, Param, Var, Set, Constraint, Objective
 from pyomo.environ import minimize, NonNegativeReals
 from pyomo.opt import SolverFactory
-import matplotlib as plt
 import pandas as pd
 import numpy as np
 
@@ -33,8 +32,8 @@ LifetimePv= 30 #a
 FactorPv = [0]+[data.loc[i,'pv_factor'] for i in model.T]  #Radiation Factor @ hour X
 
 #Dam
-StorageSize = 100000
-#StorageVariable = [StorageSize for i in range(0,len(T)+1)] #m^3 in Storage, hourly correction
+StorageSize = 1000000
+StorageVariable = [StorageSize for i in range(0,len(model.T)+1)] #m^3 in Storage, hourly correction
 Pdam = 5 #MW
 FactorDam = 10000 #m^3 Water per MW
 InflowRain = 40 #m^3 @ hour X
@@ -45,7 +44,7 @@ Cdam = 100 #€/MWh
 DemandFactor_Energy = data['demand']
 DemandTotal_Energy = 71737.392 #MWh Total
 DemandFactor_Water = data['riverflow_normed']
-DemandTotal_Water = 1529431.498 #m^3 Total
+DemandTotal_Water = 100 #m^3 Total
 
 #==============================================================================
 # ------------Calculation------------
@@ -96,13 +95,13 @@ def MaxWaterPower_rule(model, i):
 model.MaxWaterPower = Constraint(model.T, rule=MaxWaterPower_rule)
 
 #Storage
-#for i in model.T:
-#    StorageVariable[i] = StorageVariable[i-1] - model.DemandWater[i] - model.PowerGeneratingWater[i].value
-#    
-#def WaterUsage_rule (model, i):
-#    return(StorageVariable[i] >= model.DemandWater[i])
-#
-#model.WaterDemand = Constraint(model.T, rule=WaterUsage_rule)
+for i in model.T:
+    StorageVariable[i] = StorageVariable[i-1] - DemandWater[i]
+
+def WaterUsage_rule (model, i):
+    return(StorageVariable[i-1] >= DemandWater[i])
+
+model.WaterDemand = Constraint(model.T, rule=WaterUsage_rule)
 
 #------SOLVER---------
 opt = SolverFactory('glpk')
@@ -132,8 +131,9 @@ Results = pd.DataFrame({"Hour": pd.Series(Hour),
                         "Dam Output": pd.Series(DamOutput),
                         "Turbine Water": pd.Series(GenerationWaterUsed),
                         "Factor Wind": pd.Series(FactorWind[1:]),
-                        "Factor PV": pd.Series(FactorPv[1:])},
-                        columns=['Hour','Energy Demand','Water Demand','Wind Output','PV Output','Dam Output','Turbine Water','Factor Wind','Factor PV'])
+                        "Factor PV": pd.Series(FactorPv[1:]),
+                        "Storage": pd.Series(StorageVariable[1:])},
+                        columns=['Hour','Energy Demand','Water Demand','Wind Output','PV Output','Dam Output','Turbine Water','Factor Wind','Factor PV','Storage'])
 Results.index = Results.index + 1   
 
 #==============================================================================
