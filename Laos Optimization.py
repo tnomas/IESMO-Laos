@@ -17,6 +17,7 @@ damdata = pd.read_csv('dam.csv')
 
 model = ConcreteModel()
 model.T = data.index
+model.D = damdata.index
 model.DamRange = Set(initialize=[1,2,3,4,5,6,7])
 
 #==============================================================================
@@ -48,16 +49,15 @@ model.Cpv = Param(initialize=CostPv/LifetimePv) #Price per MW PV
 #Variablen
 model.Pwind = Var(domain=NonNegativeReals) #installed MW Wind
 model.Ppv = Var(domain=NonNegativeReals) #installed MW Wind
-model.Dam = Var(within=model.DamRange, bounds=(1,7), initialize = 6) #Dam Variable to choose from
+model.Dam = Var(bounds=(1,7)) #Dam Variable to choose from
 
 #==============================================================================
 # ----------Constraint & Objective & Solver------------
 #==============================================================================
-#------Objective Function-------
-        
+#------Objective Function-------        
 #Price per MW Wind * installed Wind Capacity + Price per MW Pv * installed PV capacity + Price of Dam installation
 def obj_rule(model):
-        return(model.Cwind * model.Pwind + model.Cpv * model.Ppv + damdata.loc[model.Dam,'costs'])
+        return(model.Cwind * model.Pwind + model.Cpv * model.Ppv + damdata.loc[,'costs'])
     
 model.cost = Objective(sense=minimize, rule=obj_rule)
 
@@ -65,7 +65,7 @@ model.cost = Objective(sense=minimize, rule=obj_rule)
 #----CONSTRAINTS-------
 #Power of Wind * WindFactor + PV * PVFactor + Waterused @ hour X * Pwater must be bigger than Energy Demand
 def DemandEnergy_rule(model, i):
-    return (model.Pwind * FactorWind[i] + model.Ppv * FactorPv[i] + damdata.loc[model.Dam,'power'] >= model.DemandFactor[i] * DemandTotal)
+    return (model.Pwind * FactorWind[i] + model.Ppv * FactorPv[i] +damdata.loc[d,'power'] >= model.DemandFactor[i] * DemandTotal) #
 
 model.EnergyDemand = Constraint(model.T, rule=DemandEnergy_rule)
 
