@@ -15,7 +15,7 @@ import numpy as np
 #==============================================================================
 # --------Initialize-----------
 #==============================================================================
-data = pd.read_csv('data.csv', index_col = 0, nrows=24)
+data = pd.read_csv('data.csv', header=0, index_col = 0, nrows=24)
 model = ConcreteModel()
 model.T = data.index
 
@@ -25,18 +25,18 @@ model.T = data.index
 #Wind
 CostWind = 1000000 #€/MW
 LifetimeWind = 20 #a
-FactorWind = data['windfactor'] #Wind Factor @ hour X
+FactorWind = [0]+[data.loc[i,'windfactor'] for i in model.T]  #Wind Factor @ hour X
 
 #PV
 CostPv = 100000 #€/MWp
 LifetimePv= 30 #a
-FactorPv = data['pv_factor']#Radiation Factor @ hour X
+FactorPv = [0]+[data.loc[i,'pv_factor'] for i in model.T]  #Radiation Factor @ hour X
 
 #Dam
 StorageSize = 100000
 #StorageVariable = [StorageSize for i in range(0,len(T)+1)] #m^3 in Storage, hourly correction
 Pdam = 5 #MW
-DamFactor = 10000 #m^3 Water per MW
+FactorDam = 10000 #m^3 Water per MW
 InflowRain = 40 #m^3 @ hour X
 InflowRiver = 200 #m^3 @ hour X
 Cdam = 100 #€/MWh
@@ -76,7 +76,7 @@ model.PowerGeneratingWater = Var(model.T, domain=NonNegativeReals) #used M^3 Wat
 #------Objective Function-------
 #€/MW * MW + €/MW + m^3(gesamt) * MWh/m^3 * €/MWh
 def obj_rule(model):
-        return(model.Cwind * model.Pwind + model.Cpv * model.Ppv + sum(model.PowerGeneratingWater[i] for i in model.T)/DamFactor * Cdam)
+        return(model.Cwind * model.Pwind + model.Cpv * model.Ppv + sum(model.PowerGeneratingWater[i] for i in model.T)/FactorDam * Cdam)
     
 model.cost = Objective(sense=minimize, rule=obj_rule)
 
@@ -84,14 +84,14 @@ model.cost = Objective(sense=minimize, rule=obj_rule)
 #----CONSTRAINTS-------
 #Power of Wind * WindFactor + PV * PVFactor + WaterusedforElectricity @ hour X * Generationfactor must be bigger than Energy Demand
 def DemandEnergy_rule(model, i):
-    return (model.Pwind * FactorWind[i] + model.Ppv * FactorPv[i] + model.PowerGeneratingWater[i]/DamFactor >= DemandEnergy[i])
+    return (model.Pwind * FactorWind[i] + model.Ppv * FactorPv[i] + model.PowerGeneratingWater[i]/FactorDam >= DemandEnergy[i])
 
 model.EnergyDemand = Constraint(model.T, rule=DemandEnergy_rule)
 
 
 #Limitation through Water Turbine
 def MaxWaterPower_rule(model, i):
-    return(model.PowerGeneratingWater[i]/DamFactor <= Pdam)
+    return(model.PowerGeneratingWater[i]/FactorDam <= Pdam)
 
 model.MaxWaterPower = Constraint(model.T, rule=MaxWaterPower_rule)
 
@@ -119,21 +119,22 @@ PVOutput = []; DamOutput = []
 GenerationWaterUsed = []
 for i in model.T:
     Hour.append(i)
-    EnergyDemand.append(round(DemandEnergy[i],2))
-    WaterDemand.append(round(DemandEnergy[i],2))
     WindOutput.append(round(FactorWind[i]*model.Pwind.value,2))
     PVOutput.append(round(FactorPv[i]*model.Ppv.value,2))
-    DamOutput.append(round(model.PowerGeneratingWater[i].value/DamFactor,2))
+    DamOutput.append(round(model.PowerGeneratingWater[i].value/FactorDam,2))
     GenerationWaterUsed.append(round(model.PowerGeneratingWater[i].value,2))
-    
+
 Results = pd.DataFrame({"Hour": pd.Series(Hour), 
-                        "Energy Demand": pd.Series(EnergyDemand),
-                        "Water Demand": pd.Series(WaterDemand),
+                        "Energy Demand": pd.Series(DemandEnergy[1:]),
+                        "Water Demand": pd.Series(DemandWater[1:]),
                         "Wind Output": pd.Series(WindOutput),
                         "PV Output": pd.Series(PVOutput),
                         "Dam Output": pd.Series(DamOutput),
-                        "Turbine Water": pd.Series(GenerationWaterUsed)},
-                        columns=['Hour','Energy Demand','Water Demand','Wind Output','PV Output','Dam Output','Turbine Water'])
+                        "Turbine Water": pd.Series(GenerationWaterUsed),
+                        "Factor Wind": pd.Series(FactorWind[1:]),
+                        "Factor PV": pd.Series(FactorPv[1:])},
+                        columns=['Hour','Energy Demand','Water Demand','Wind Output','PV Output','Dam Output','Turbine Water','Factor Wind','Factor PV'])
+Results.index = Results.index + 1   
 
 #==============================================================================
 # ------------OUTPUT------------
