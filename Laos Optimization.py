@@ -1,8 +1,5 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Thu Jul 13 17:52:14 2017
-
 @author: nilshoffmann
 """
 
@@ -20,44 +17,20 @@ damdata = pd.read_csv('dam.csv')
 
 model = ConcreteModel()
 model.T = data.index
-<<<<<<< HEAD
-model.DamRange = Set(initialize=[1,2,3,4])
-=======
 model.DamRange = Set(initialize=[1,2,3,4,5,6,7])
->>>>>>> 9bc24b276eabb77a1a7ad11b040c5777afe56346
 
 #==============================================================================
 # ------------Variables------------
 #==============================================================================
 #Wind
-CostWind = 77350 #€/MW/a
+CostWind = 1000000 #€/MW
 LifetimeWind = 20 #a
 FactorWind = data['windfactor'] #Wind Factor @ hour X
 
 #PV
-<<<<<<< HEAD
-<<<<<<< HEAD
-CostPv = 37120 #€/MWp/a
-LifetimePv= 25 #a
-FactorPv = [0.5, 0.3, 0.8, 0.4, 0.0] #Radiation Factor @ hour X
-
-#Water
-StorageSize = 1500
-StorageVariable = [StorageSize for i in range(0,len(T)+1)] #m^3 in Storage, hourly correction
-Pwater = 0.001 #MWh/m^3
-TurbineLimit = 480 #MW
-InflowRain = 40 #m^3 @ hour X
-InflowRiver = 200 #m^3 @ hour X
-=======
 CostPv = 1000000 #€/MWp
 LifetimePv= 20 #a
 FactorPv = data['pv_factor']#Radiation Factor @ hour X
->>>>>>> 0493c8d79f5a9bd470ae6dcb865145697a9c51f6
-=======
-CostPv = 1000000 #€/MWp
-LifetimePv= 20 #a
-FactorPv = data['pv_factor']#Radiation Factor @ hour X
->>>>>>> 9bc24b276eabb77a1a7ad11b040c5777afe56346
 
 #Demand
 DemandFactor = data['demand']
@@ -75,11 +48,7 @@ model.Cpv = Param(initialize=CostPv/LifetimePv) #Price per MW PV
 #Variablen
 model.Pwind = Var(domain=NonNegativeReals) #installed MW Wind
 model.Ppv = Var(domain=NonNegativeReals) #installed MW Wind
-<<<<<<< HEAD
-model.Dam = Var(within=model.DamRange, bounds=(1,4)) #Dam Variable to choose from
-=======
 model.Dam = Var(within=model.DamRange, bounds=(1,7), initialize = 6) #Dam Variable to choose from
->>>>>>> 9bc24b276eabb77a1a7ad11b040c5777afe56346
 
 #==============================================================================
 # ----------Constraint & Objective & Solver------------
