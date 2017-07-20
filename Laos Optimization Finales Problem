@@ -32,20 +32,18 @@ LifetimePv= 30 #a
 FactorPv = [0]+[(data.loc[i,'pv_factor']*8760) for i in model.T]  #Radiation Factor @ hour X
 
 #Dam
-global StorageVariable
-StorageSize = 1000000
-StorageVariable = [StorageSize for i in range(0,len(model.T)+1)] #m^3 in Storage, hourly correction
+StorageSize = 8000
 Pdam = 100 #MW
 FactorDam = 10000 #m^3 Water per MW
-InflowRain = 2 #m^3 @ hour X
-InflowRiver = 1 #m^3 @ hour X
+InflowRain = 1000 #m^3 @ hour X
+InflowRiver = 1000 #m^3 @ hour X
 Cdam = 100 #€/MWh
 
 #Demand
 DemandFactor_Energy = data['demand']
 DemandTotal_Energy = 71737.392 #MWh Total
 DemandFactor_Water = data['riverflow_normed']
-DemandTotal_Water = 100000000 #m^3 Total
+DemandTotal_Water = 10000000 #m^3 Total
 
 #==============================================================================
 # ------------Calculation------------
@@ -64,6 +62,7 @@ model.Cwind = Param(initialize=Cwind) #Price per MW Wind
 model.Cpv = Param(initialize=Cpv) #Price per MW PV
 model.Cdam = Param(initialize=Cdam) #Price of Water €/MWh
 model.Pdam = Param(initialize=Pdam) #Maximum Turbine Generation Capacity
+model.StorageSize= Param(initialize=StorageSize)
 
 #Variablen
 model.Pwind = Var(domain=NonNegativeReals) #installed MW Wind
@@ -81,27 +80,29 @@ def obj_rule(model):
 model.cost = Objective(sense=minimize, rule=obj_rule)
     
 #----CONSTRAINTS-------
-#Power of Wind * WindFactor + PV * PVFactor + WaterusedforElectricity @ hour X * Generationfactor must be bigger than Energy Demand
+#Fullfil Demand
 def DemandEnergy_rule(model, i):
     return (model.Pwind * FactorWind[i] + model.Ppv * FactorPv[i] + model.PowerGeneratingWater[i]/FactorDam >= DemandEnergy[i])
 
 model.EnergyDemand = Constraint(model.T, rule=DemandEnergy_rule)
 
-
-#Limitation through Water Turbine
+#Limitation through Turbine Capacity
 def MaxWaterPower_rule(model, i):
     return(model.PowerGeneratingWater[i]/FactorDam <= Pdam)
 
 model.MaxWaterPower = Constraint(model.T, rule=MaxWaterPower_rule)
 
-#for i in model.T:
-#    StorageVariable[i] = StorageVariable[i-1]  InflowRain - InflowRiver
-    
-#Storage
-def WaterUsage_rule (model, i):
-    return(model.PowerGeneratingWater[i] <= StorageVariable[i] + sum(InflowRain for i in range(1,i)) + sum(InflowRiver for i in range(1,i)) - sum(model.PowerGeneratingWater[i] for i in range(1,i)))
+#Always fullfil Water Demand
+def WaterUsage_rule(model, i):
+    return(model.PowerGeneratingWater[i] <= model.StorageSize + sum(InflowRain for i in range(1,i)) + sum(InflowRiver for i in range(1,i)) - sum(model.PowerGeneratingWater[i] for i in range(1,i)) - sum(DemandWater[i] for i in range(1,i)))
 
 model.WaterDemand = Constraint(model.T, rule=WaterUsage_rule)
+
+#Never Store more than possible
+def MaxStorageCapacity_rule (model,i):
+    return(model.StorageSize >= model.StorageSize + sum(InflowRain for i in range(1,i)) + sum(InflowRiver for i in range(1,i)) - sum(model.PowerGeneratingWater[i] for i in range(1,i)) - sum(DemandWater[i] for i in range(1,i)))
+
+model.MaxStorageCapacity = Constraint(model.T, rule=MaxStorageCapacity_rule)
 
 #------SOLVER---------
 opt = SolverFactory('glpk')
@@ -115,14 +116,14 @@ results = opt.solve(model, tee=True)
 Hour = []; WindOutput = []
 EnergyDemand = []; WaterDemand = []
 PVOutput = []; DamOutput = []
-GenerationWaterUsed = []; Variable = []
+GenerationWaterUsed = []; Storage = [0]
 for i in model.T:
     Hour.append(i)
     WindOutput.append(round(FactorWind[i]*model.Pwind.value,2))
     PVOutput.append(round(FactorPv[i]*model.Ppv.value,2))
     DamOutput.append(round(model.PowerGeneratingWater[i].value/FactorDam,2))
     GenerationWaterUsed.append(round(model.PowerGeneratingWater[i].value,2))
-    Variable.append(round((StorageVariable[i] + sum(InflowRain for i in range(1,i)) + sum(InflowRiver for i in range(1,i)) - sum(model.PowerGeneratingWater[i].value for i in range(1,i))),2))
+    Storage.append(round((model.StorageSize + sum(InflowRain for i in range(1,i)) + sum(InflowRiver for i in range(1,i)) - sum(model.PowerGeneratingWater[i].value for i in range(1,i)) -sum(DemandWater[i] for i in range(1,i))),2))
 
 Results = pd.DataFrame({"Hour": pd.Series(Hour), 
                         "Energy Demand": pd.Series(DemandEnergy[1:]),
@@ -133,7 +134,7 @@ Results = pd.DataFrame({"Hour": pd.Series(Hour),
                         "Turbine Water": pd.Series(GenerationWaterUsed),
                         "Factor Wind": pd.Series(FactorWind[1:]),
                         "Factor PV": pd.Series(FactorPv[1:]),
-                        "Storage": pd.Series(Variable[1:])},
+                        "Storage": pd.Series(Storage[1:])},
                         columns=['Hour','Energy Demand','Water Demand','Wind Output','PV Output','Dam Output','Turbine Water','Factor Wind','Factor PV','Storage'])
 Results.index = Results.index + 1   
 

@@ -260,25 +260,25 @@ c_u_MaxWaterPower(24)_:
 
 c_u_WaterDemand(1)_:
 +1 PowerGeneratingWater(1)
-<= 1000000
+<= 8000
 
 c_u_WaterDemand(2)_:
 +1 PowerGeneratingWater(1)
 +1 PowerGeneratingWater(2)
-<= 1000003
+<= 9673.1943756276087
 
 c_u_WaterDemand(3)_:
 +1 PowerGeneratingWater(1)
 +1 PowerGeneratingWater(2)
 +1 PowerGeneratingWater(3)
-<= 1000006
+<= 11346.388751255216
 
 c_u_WaterDemand(4)_:
 +1 PowerGeneratingWater(1)
 +1 PowerGeneratingWater(2)
 +1 PowerGeneratingWater(3)
 +1 PowerGeneratingWater(4)
-<= 1000009
+<= 13019.583126882824
 
 c_u_WaterDemand(5)_:
 +1 PowerGeneratingWater(1)
@@ -286,7 +286,7 @@ c_u_WaterDemand(5)_:
 +1 PowerGeneratingWater(3)
 +1 PowerGeneratingWater(4)
 +1 PowerGeneratingWater(5)
-<= 1000012
+<= 14692.777502510433
 
 c_u_WaterDemand(6)_:
 +1 PowerGeneratingWater(1)
@@ -295,7 +295,7 @@ c_u_WaterDemand(6)_:
 +1 PowerGeneratingWater(4)
 +1 PowerGeneratingWater(5)
 +1 PowerGeneratingWater(6)
-<= 1000015
+<= 16365.97187813804
 
 c_u_WaterDemand(7)_:
 +1 PowerGeneratingWater(1)
@@ -305,7 +305,7 @@ c_u_WaterDemand(7)_:
 +1 PowerGeneratingWater(5)
 +1 PowerGeneratingWater(6)
 +1 PowerGeneratingWater(7)
-<= 1000018
+<= 18039.166253765648
 
 c_u_WaterDemand(8)_:
 +1 PowerGeneratingWater(1)
@@ -316,7 +316,7 @@ c_u_WaterDemand(8)_:
 +1 PowerGeneratingWater(6)
 +1 PowerGeneratingWater(7)
 +1 PowerGeneratingWater(8)
-<= 1000021
+<= 19712.360629393257
 
 c_u_WaterDemand(9)_:
 +1 PowerGeneratingWater(1)
@@ -328,7 +328,7 @@ c_u_WaterDemand(9)_:
 +1 PowerGeneratingWater(7)
 +1 PowerGeneratingWater(8)
 +1 PowerGeneratingWater(9)
-<= 1000024
+<= 21385.555005020866
 
 c_u_WaterDemand(10)_:
 +1 PowerGeneratingWater(1)
@@ -341,7 +341,7 @@ c_u_WaterDemand(10)_:
 +1 PowerGeneratingWater(7)
 +1 PowerGeneratingWater(8)
 +1 PowerGeneratingWater(9)
-<= 1000027
+<= 23058.749380648471
 
 c_u_WaterDemand(11)_:
 +1 PowerGeneratingWater(1)
@@ -355,7 +355,7 @@ c_u_WaterDemand(11)_:
 +1 PowerGeneratingWater(7)
 +1 PowerGeneratingWater(8)
 +1 PowerGeneratingWater(9)
-<= 1000030
+<= 24731.94375627608
 
 c_u_WaterDemand(12)_:
 +1 PowerGeneratingWater(1)
@@ -370,7 +370,7 @@ c_u_WaterDemand(12)_:
 +1 PowerGeneratingWater(7)
 +1 PowerGeneratingWater(8)
 +1 PowerGeneratingWater(9)
-<= 1000033
+<= 26405.138131903688
 
 c_u_WaterDemand(13)_:
 +1 PowerGeneratingWater(1)
@@ -386,7 +386,7 @@ c_u_WaterDemand(13)_:
 +1 PowerGeneratingWater(7)
 +1 PowerGeneratingWater(8)
 +1 PowerGeneratingWater(9)
-<= 1000036
+<= 28078.332507531297
 
 c_u_WaterDemand(14)_:
 +1 PowerGeneratingWater(1)
@@ -403,7 +403,7 @@ c_u_WaterDemand(14)_:
 +1 PowerGeneratingWater(7)
 +1 PowerGeneratingWater(8)
 +1 PowerGeneratingWater(9)
-<= 1000039
+<= 29751.526883158906
 
 c_u_WaterDemand(15)_:
 +1 PowerGeneratingWater(1)
@@ -421,7 +421,7 @@ c_u_WaterDemand(15)_:
 +1 PowerGeneratingWater(7)
 +1 PowerGeneratingWater(8)
 +1 PowerGeneratingWater(9)
-<= 1000042
+<= 31424.721258786514
 
 c_u_WaterDemand(16)_:
 +1 PowerGeneratingWater(1)
@@ -440,7 +440,7 @@ c_u_WaterDemand(16)_:
 +1 PowerGeneratingWater(7)
 +1 PowerGeneratingWater(8)
 +1 PowerGeneratingWater(9)
-<= 1000045
+<= 33097.915634414123
 
 c_u_WaterDemand(17)_:
 +1 PowerGeneratingWater(1)
@@ -460,7 +460,7 @@ c_u_WaterDemand(17)_:
 +1 PowerGeneratingWater(7)
 +1 PowerGeneratingWater(8)
 +1 PowerGeneratingWater(9)
-<= 1000048
+<= 34771.110010041732
 
 c_u_WaterDemand(18)_:
 +1 PowerGeneratingWater(1)
@@ -481,7 +481,7 @@ c_u_WaterDemand(18)_:
 +1 PowerGeneratingWater(7)
 +1 PowerGeneratingWater(8)
 +1 PowerGeneratingWater(9)
-<= 1000051
+<= 36444.30438566934
 
 c_u_WaterDemand(19)_:
 +1 PowerGeneratingWater(1)
@@ -503,7 +503,7 @@ c_u_WaterDemand(19)_:
 +1 PowerGeneratingWater(7)
 +1 PowerGeneratingWater(8)
 +1 PowerGeneratingWater(9)
-<= 1000054
+<= 38117.498761296942
 
 c_u_WaterDemand(20)_:
 +1 PowerGeneratingWater(1)
@@ -526,7 +526,7 @@ c_u_WaterDemand(20)_:
 +1 PowerGeneratingWater(7)
 +1 PowerGeneratingWater(8)
 +1 PowerGeneratingWater(9)
-<= 1000057
+<= 39790.69313692455
 
 c_u_WaterDemand(21)_:
 +1 PowerGeneratingWater(1)
@@ -550,7 +550,7 @@ c_u_WaterDemand(21)_:
 +1 PowerGeneratingWater(7)
 +1 PowerGeneratingWater(8)
 +1 PowerGeneratingWater(9)
-<= 1000060
+<= 41463.887512552159
 
 c_u_WaterDemand(22)_:
 +1 PowerGeneratingWater(1)
@@ -575,7 +575,7 @@ c_u_WaterDemand(22)_:
 +1 PowerGeneratingWater(7)
 +1 PowerGeneratingWater(8)
 +1 PowerGeneratingWater(9)
-<= 1000063
+<= 43137.081888179768
 
 c_u_WaterDemand(23)_:
 +1 PowerGeneratingWater(1)
@@ -601,7 +601,7 @@ c_u_WaterDemand(23)_:
 +1 PowerGeneratingWater(7)
 +1 PowerGeneratingWater(8)
 +1 PowerGeneratingWater(9)
-<= 1000066
+<= 44810.276263807376
 
 c_u_WaterDemand(24)_:
 +1 PowerGeneratingWater(1)
@@ -628,7 +628,356 @@ c_u_WaterDemand(24)_:
 +1 PowerGeneratingWater(7)
 +1 PowerGeneratingWater(8)
 +1 PowerGeneratingWater(9)
-<= 1000069
+<= 46483.470639434985
+
+c_u_MaxStorageCapacity(1)_:
++0 ONE_VAR_CONSTANT
+<= 0
+
+c_u_MaxStorageCapacity(2)_:
+-1 PowerGeneratingWater(1)
+<= -1673.1943756276087
+
+c_u_MaxStorageCapacity(3)_:
+-1 PowerGeneratingWater(1)
+-1 PowerGeneratingWater(2)
+<= -3346.3887512552155
+
+c_u_MaxStorageCapacity(4)_:
+-1 PowerGeneratingWater(1)
+-1 PowerGeneratingWater(2)
+-1 PowerGeneratingWater(3)
+<= -5019.5831268828242
+
+c_u_MaxStorageCapacity(5)_:
+-1 PowerGeneratingWater(1)
+-1 PowerGeneratingWater(2)
+-1 PowerGeneratingWater(3)
+-1 PowerGeneratingWater(4)
+<= -6692.7775025104329
+
+c_u_MaxStorageCapacity(6)_:
+-1 PowerGeneratingWater(1)
+-1 PowerGeneratingWater(2)
+-1 PowerGeneratingWater(3)
+-1 PowerGeneratingWater(4)
+-1 PowerGeneratingWater(5)
+<= -8365.9718781380398
+
+c_u_MaxStorageCapacity(7)_:
+-1 PowerGeneratingWater(1)
+-1 PowerGeneratingWater(2)
+-1 PowerGeneratingWater(3)
+-1 PowerGeneratingWater(4)
+-1 PowerGeneratingWater(5)
+-1 PowerGeneratingWater(6)
+<= -10039.166253765648
+
+c_u_MaxStorageCapacity(8)_:
+-1 PowerGeneratingWater(1)
+-1 PowerGeneratingWater(2)
+-1 PowerGeneratingWater(3)
+-1 PowerGeneratingWater(4)
+-1 PowerGeneratingWater(5)
+-1 PowerGeneratingWater(6)
+-1 PowerGeneratingWater(7)
+<= -11712.360629393257
+
+c_u_MaxStorageCapacity(9)_:
+-1 PowerGeneratingWater(1)
+-1 PowerGeneratingWater(2)
+-1 PowerGeneratingWater(3)
+-1 PowerGeneratingWater(4)
+-1 PowerGeneratingWater(5)
+-1 PowerGeneratingWater(6)
+-1 PowerGeneratingWater(7)
+-1 PowerGeneratingWater(8)
+<= -13385.555005020866
+
+c_u_MaxStorageCapacity(10)_:
+-1 PowerGeneratingWater(1)
+-1 PowerGeneratingWater(2)
+-1 PowerGeneratingWater(3)
+-1 PowerGeneratingWater(4)
+-1 PowerGeneratingWater(5)
+-1 PowerGeneratingWater(6)
+-1 PowerGeneratingWater(7)
+-1 PowerGeneratingWater(8)
+-1 PowerGeneratingWater(9)
+<= -15058.749380648471
+
+c_u_MaxStorageCapacity(11)_:
+-1 PowerGeneratingWater(1)
+-1 PowerGeneratingWater(10)
+-1 PowerGeneratingWater(2)
+-1 PowerGeneratingWater(3)
+-1 PowerGeneratingWater(4)
+-1 PowerGeneratingWater(5)
+-1 PowerGeneratingWater(6)
+-1 PowerGeneratingWater(7)
+-1 PowerGeneratingWater(8)
+-1 PowerGeneratingWater(9)
+<= -16731.94375627608
+
+c_u_MaxStorageCapacity(12)_:
+-1 PowerGeneratingWater(1)
+-1 PowerGeneratingWater(10)
+-1 PowerGeneratingWater(11)
+-1 PowerGeneratingWater(2)
+-1 PowerGeneratingWater(3)
+-1 PowerGeneratingWater(4)
+-1 PowerGeneratingWater(5)
+-1 PowerGeneratingWater(6)
+-1 PowerGeneratingWater(7)
+-1 PowerGeneratingWater(8)
+-1 PowerGeneratingWater(9)
+<= -18405.138131903688
+
+c_u_MaxStorageCapacity(13)_:
+-1 PowerGeneratingWater(1)
+-1 PowerGeneratingWater(10)
+-1 PowerGeneratingWater(11)
+-1 PowerGeneratingWater(12)
+-1 PowerGeneratingWater(2)
+-1 PowerGeneratingWater(3)
+-1 PowerGeneratingWater(4)
+-1 PowerGeneratingWater(5)
+-1 PowerGeneratingWater(6)
+-1 PowerGeneratingWater(7)
+-1 PowerGeneratingWater(8)
+-1 PowerGeneratingWater(9)
+<= -20078.332507531297
+
+c_u_MaxStorageCapacity(14)_:
+-1 PowerGeneratingWater(1)
+-1 PowerGeneratingWater(10)
+-1 PowerGeneratingWater(11)
+-1 PowerGeneratingWater(12)
+-1 PowerGeneratingWater(13)
+-1 PowerGeneratingWater(2)
+-1 PowerGeneratingWater(3)
+-1 PowerGeneratingWater(4)
+-1 PowerGeneratingWater(5)
+-1 PowerGeneratingWater(6)
+-1 PowerGeneratingWater(7)
+-1 PowerGeneratingWater(8)
+-1 PowerGeneratingWater(9)
+<= -21751.526883158906
+
+c_u_MaxStorageCapacity(15)_:
+-1 PowerGeneratingWater(1)
+-1 PowerGeneratingWater(10)
+-1 PowerGeneratingWater(11)
+-1 PowerGeneratingWater(12)
+-1 PowerGeneratingWater(13)
+-1 PowerGeneratingWater(14)
+-1 PowerGeneratingWater(2)
+-1 PowerGeneratingWater(3)
+-1 PowerGeneratingWater(4)
+-1 PowerGeneratingWater(5)
+-1 PowerGeneratingWater(6)
+-1 PowerGeneratingWater(7)
+-1 PowerGeneratingWater(8)
+-1 PowerGeneratingWater(9)
+<= -23424.721258786514
+
+c_u_MaxStorageCapacity(16)_:
+-1 PowerGeneratingWater(1)
+-1 PowerGeneratingWater(10)
+-1 PowerGeneratingWater(11)
+-1 PowerGeneratingWater(12)
+-1 PowerGeneratingWater(13)
+-1 PowerGeneratingWater(14)
+-1 PowerGeneratingWater(15)
+-1 PowerGeneratingWater(2)
+-1 PowerGeneratingWater(3)
+-1 PowerGeneratingWater(4)
+-1 PowerGeneratingWater(5)
+-1 PowerGeneratingWater(6)
+-1 PowerGeneratingWater(7)
+-1 PowerGeneratingWater(8)
+-1 PowerGeneratingWater(9)
+<= -25097.915634414123
+
+c_u_MaxStorageCapacity(17)_:
+-1 PowerGeneratingWater(1)
+-1 PowerGeneratingWater(10)
+-1 PowerGeneratingWater(11)
+-1 PowerGeneratingWater(12)
+-1 PowerGeneratingWater(13)
+-1 PowerGeneratingWater(14)
+-1 PowerGeneratingWater(15)
+-1 PowerGeneratingWater(16)
+-1 PowerGeneratingWater(2)
+-1 PowerGeneratingWater(3)
+-1 PowerGeneratingWater(4)
+-1 PowerGeneratingWater(5)
+-1 PowerGeneratingWater(6)
+-1 PowerGeneratingWater(7)
+-1 PowerGeneratingWater(8)
+-1 PowerGeneratingWater(9)
+<= -26771.110010041732
+
+c_u_MaxStorageCapacity(18)_:
+-1 PowerGeneratingWater(1)
+-1 PowerGeneratingWater(10)
+-1 PowerGeneratingWater(11)
+-1 PowerGeneratingWater(12)
+-1 PowerGeneratingWater(13)
+-1 PowerGeneratingWater(14)
+-1 PowerGeneratingWater(15)
+-1 PowerGeneratingWater(16)
+-1 PowerGeneratingWater(17)
+-1 PowerGeneratingWater(2)
+-1 PowerGeneratingWater(3)
+-1 PowerGeneratingWater(4)
+-1 PowerGeneratingWater(5)
+-1 PowerGeneratingWater(6)
+-1 PowerGeneratingWater(7)
+-1 PowerGeneratingWater(8)
+-1 PowerGeneratingWater(9)
+<= -28444.30438566934
+
+c_u_MaxStorageCapacity(19)_:
+-1 PowerGeneratingWater(1)
+-1 PowerGeneratingWater(10)
+-1 PowerGeneratingWater(11)
+-1 PowerGeneratingWater(12)
+-1 PowerGeneratingWater(13)
+-1 PowerGeneratingWater(14)
+-1 PowerGeneratingWater(15)
+-1 PowerGeneratingWater(16)
+-1 PowerGeneratingWater(17)
+-1 PowerGeneratingWater(18)
+-1 PowerGeneratingWater(2)
+-1 PowerGeneratingWater(3)
+-1 PowerGeneratingWater(4)
+-1 PowerGeneratingWater(5)
+-1 PowerGeneratingWater(6)
+-1 PowerGeneratingWater(7)
+-1 PowerGeneratingWater(8)
+-1 PowerGeneratingWater(9)
+<= -30117.498761296942
+
+c_u_MaxStorageCapacity(20)_:
+-1 PowerGeneratingWater(1)
+-1 PowerGeneratingWater(10)
+-1 PowerGeneratingWater(11)
+-1 PowerGeneratingWater(12)
+-1 PowerGeneratingWater(13)
+-1 PowerGeneratingWater(14)
+-1 PowerGeneratingWater(15)
+-1 PowerGeneratingWater(16)
+-1 PowerGeneratingWater(17)
+-1 PowerGeneratingWater(18)
+-1 PowerGeneratingWater(19)
+-1 PowerGeneratingWater(2)
+-1 PowerGeneratingWater(3)
+-1 PowerGeneratingWater(4)
+-1 PowerGeneratingWater(5)
+-1 PowerGeneratingWater(6)
+-1 PowerGeneratingWater(7)
+-1 PowerGeneratingWater(8)
+-1 PowerGeneratingWater(9)
+<= -31790.69313692455
+
+c_u_MaxStorageCapacity(21)_:
+-1 PowerGeneratingWater(1)
+-1 PowerGeneratingWater(10)
+-1 PowerGeneratingWater(11)
+-1 PowerGeneratingWater(12)
+-1 PowerGeneratingWater(13)
+-1 PowerGeneratingWater(14)
+-1 PowerGeneratingWater(15)
+-1 PowerGeneratingWater(16)
+-1 PowerGeneratingWater(17)
+-1 PowerGeneratingWater(18)
+-1 PowerGeneratingWater(19)
+-1 PowerGeneratingWater(2)
+-1 PowerGeneratingWater(20)
+-1 PowerGeneratingWater(3)
+-1 PowerGeneratingWater(4)
+-1 PowerGeneratingWater(5)
+-1 PowerGeneratingWater(6)
+-1 PowerGeneratingWater(7)
+-1 PowerGeneratingWater(8)
+-1 PowerGeneratingWater(9)
+<= -33463.887512552159
+
+c_u_MaxStorageCapacity(22)_:
+-1 PowerGeneratingWater(1)
+-1 PowerGeneratingWater(10)
+-1 PowerGeneratingWater(11)
+-1 PowerGeneratingWater(12)
+-1 PowerGeneratingWater(13)
+-1 PowerGeneratingWater(14)
+-1 PowerGeneratingWater(15)
+-1 PowerGeneratingWater(16)
+-1 PowerGeneratingWater(17)
+-1 PowerGeneratingWater(18)
+-1 PowerGeneratingWater(19)
+-1 PowerGeneratingWater(2)
+-1 PowerGeneratingWater(20)
+-1 PowerGeneratingWater(21)
+-1 PowerGeneratingWater(3)
+-1 PowerGeneratingWater(4)
+-1 PowerGeneratingWater(5)
+-1 PowerGeneratingWater(6)
+-1 PowerGeneratingWater(7)
+-1 PowerGeneratingWater(8)
+-1 PowerGeneratingWater(9)
+<= -35137.081888179768
+
+c_u_MaxStorageCapacity(23)_:
+-1 PowerGeneratingWater(1)
+-1 PowerGeneratingWater(10)
+-1 PowerGeneratingWater(11)
+-1 PowerGeneratingWater(12)
+-1 PowerGeneratingWater(13)
+-1 PowerGeneratingWater(14)
+-1 PowerGeneratingWater(15)
+-1 PowerGeneratingWater(16)
+-1 PowerGeneratingWater(17)
+-1 PowerGeneratingWater(18)
+-1 PowerGeneratingWater(19)
+-1 PowerGeneratingWater(2)
+-1 PowerGeneratingWater(20)
+-1 PowerGeneratingWater(21)
+-1 PowerGeneratingWater(22)
+-1 PowerGeneratingWater(3)
+-1 PowerGeneratingWater(4)
+-1 PowerGeneratingWater(5)
+-1 PowerGeneratingWater(6)
+-1 PowerGeneratingWater(7)
+-1 PowerGeneratingWater(8)
+-1 PowerGeneratingWater(9)
+<= -36810.276263807376
+
+c_u_MaxStorageCapacity(24)_:
+-1 PowerGeneratingWater(1)
+-1 PowerGeneratingWater(10)
+-1 PowerGeneratingWater(11)
+-1 PowerGeneratingWater(12)
+-1 PowerGeneratingWater(13)
+-1 PowerGeneratingWater(14)
+-1 PowerGeneratingWater(15)
+-1 PowerGeneratingWater(16)
+-1 PowerGeneratingWater(17)
+-1 PowerGeneratingWater(18)
+-1 PowerGeneratingWater(19)
+-1 PowerGeneratingWater(2)
+-1 PowerGeneratingWater(20)
+-1 PowerGeneratingWater(21)
+-1 PowerGeneratingWater(22)
+-1 PowerGeneratingWater(23)
+-1 PowerGeneratingWater(3)
+-1 PowerGeneratingWater(4)
+-1 PowerGeneratingWater(5)
+-1 PowerGeneratingWater(6)
+-1 PowerGeneratingWater(7)
+-1 PowerGeneratingWater(8)
+-1 PowerGeneratingWater(9)
+<= -38483.470639434985
 
 c_e_ONE_VAR_CONSTANT: 
 ONE_VAR_CONSTANT = 1.0
