@@ -20,7 +20,7 @@ damdata = pd.read_csv('dam.csv')
 
 model = ConcreteModel()
 model.T = data.index
-model.DamRange = Set(initialize=[1,2,3,4])
+model.DamRange = Set(initialize=[1,2,3,4,5,6,7])
 
 #==============================================================================
 # ------------Variables------------
@@ -51,7 +51,7 @@ model.Cpv = Param(initialize=CostPv/LifetimePv) #Price per MW PV
 #Variablen
 model.Pwind = Var(domain=NonNegativeReals) #installed MW Wind
 model.Ppv = Var(domain=NonNegativeReals) #installed MW Wind
-model.Dam = Var(within=model.DamRange, bounds=(1,4)) #Dam Variable to choose from
+model.Dam = Var(within=model.DamRange, bounds=(1,7), initialize = 6) #Dam Variable to choose from
 
 #==============================================================================
 # ----------Constraint & Objective & Solver------------
