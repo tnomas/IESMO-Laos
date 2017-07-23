@@ -260,5 +260,10 @@ print(Results)
 time = datetime.now() - start
 print('Runtime: ' + str(time) + " for a calculation of " + str(calc_hours) + " hours.")
 
+if (sum(model.PExcess[i] for i in model.T)) == 0:
+    print('No Excess left. All ok.')
+else:
+    print('WARNING: THere is excess left')
+
 #plt.show()
 
