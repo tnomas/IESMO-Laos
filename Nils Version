@@ -130,12 +130,11 @@ Wasser für Energieerzeugung <=  Speichergröße (komplette Füllung am Anfang)
                                +Summe bis Stunde X Zufluss
                                -Summe bis Stunde X Wasser für Energieerzeugung
                                -Summe bis Stunde X Wasserverbrauch für Demand'''
+                               
 
 def WaterUsage_rule(model, i):
-    return(model.PowerGeneratingWater[i] <= model.StorageSize 
-                                          + sum((FactorWaterInflow[i] * WaterInflowTotal) for i in range(1,i)) 
-                                          - sum(model.PowerGeneratingWater[i] for i in range(1,i)) 
-                                          - sum(DemandWater[i] for i in range(1,i)))
+    Storage = model.StorageSize + sum((FactorWaterInflow[i] * WaterInflowTotal) for i in range(1,i)) - sum(model.PowerGeneratingWater[i] for i in range(1,i)) - sum(DemandWater[i] for i in range(1,i))
+    return(model.PowerGeneratingWater[i] <= Storage)
 
 model.WaterDemand = Constraint(model.T, rule=WaterUsage_rule)
 
@@ -151,7 +150,7 @@ def MaxStorageCapacity_rule (model, i):
     #else:
     #    return(model.StorageVolume[i] == StorageVolume + FactorWaterInflow[i] * WaterInflowTotal - model.PowerGeneratingWater[i] - DemandWater[i]+ model.StorageExcess[i])
 
-model.MaxStorageCapacity = Constraint(model.T, rule=MaxStorageCapacity_rule)
+#model.MaxStorageCapacity = Constraint(model.T, rule=MaxStorageCapacity_rule)
 
 #------SOLVER---------
 opt = SolverFactory('glpk')
