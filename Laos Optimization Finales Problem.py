@@ -54,6 +54,7 @@ FactorPv = [0]+[(data.loc[i,'pv_factor']*8760) for i in model.T]  #Radiation Fac
 
 #Dam
 StorageSize = 90000 #m^3 Beschränkt
+StorageVolume = 50000
 Pdam = 100 #MW
 FactorDam = 10000 #m^3 Water per MW
 FactorWaterInflow = [0] + [data.loc[i,'riverflow_normed'] for i in model.T]
@@ -101,6 +102,8 @@ model.Pwind = Var(domain=NonNegativeReals) #installed MW Wind
 model.Ppv = Var(domain=NonNegativeReals) #installed MW Wind
 model.PowerGeneratingWater = Var(model.T, domain=NonNegativeReals) #used M^3 Water for Electricity Generation @ hour X
 model.PExcess = Var(model.T, domain=NonNegativeReals)
+model.StorageVolume = Var(model.T, domain=NonNegativeReals, bounds=(0, StorageSize))
+model.StorageExcess = Var(model.T)
 
 #==============================================================================
 # ----------Constraint & Objective & Solver------------
@@ -109,7 +112,8 @@ model.PExcess = Var(model.T, domain=NonNegativeReals)
 #------Objective Function-------
 #€/MW * MW + €/MW + m^3(gesamt) * MWh/m^3 * €/MWh, Ziel: Minimieren
 def obj_rule(model):
-        return(model.Cwind * model.Pwind + model.Cpv * model.Ppv + sum(model.PowerGeneratingWater[i] for i in model.T)/FactorDam * Cdam + model.CExcess * sum(model.PExcess[i] for i in model.T))
+        return(model.Cwind * model.Pwind + model.Cpv * model.Ppv + sum(model.PowerGeneratingWater[i] for i in model.T)/FactorDam * Cdam \
+                                                                       + model.CExcess * (sum(model.PExcess[i] for i in model.T)+ sum(model.StorageExcess[i] for i in model.T)))
     
 model.cost = Objective(sense=minimize, rule=obj_rule)
     
@@ -143,8 +147,12 @@ model.WaterDemand = Constraint(model.T, rule=WaterUsage_rule)
 
 #Never Store more than possible
 #Selbes Prinzip wie bei WaterUsage_rule, dieses mal darf es nicht mehr Wasser als die Speichergröße model.StorageSize werden
-def MaxStorageCapacity_rule (model,i):
-    return(model.StorageSize >= model.StorageSize + sum((FactorWaterInflow[i] * WaterInflowTotal) for i in range(1,i)) - sum(model.PowerGeneratingWater[i] for i in range(1,i)) - sum(DemandWater[i] for i in range(1,i)))
+def MaxStorageCapacity_rule (model, i):
+    if 1 < i < 8760:
+        return(model.StorageVolume[i] == model.StorageVolume[i-1] + FactorWaterInflow[i] * WaterInflowTotal - model.PowerGeneratingWater[i] - DemandWater[i] + model.StorageExcess[i])
+        #return(model.StorageSize >= model.StorageSize + sum((FactorWaterInflow[i] * WaterInflowTotal) for i in range(1,i)) - sum(model.PowerGeneratingWater[i] for i in range(1,i)) - sum(DemandWater[i] for i in range(1,i)))
+    else:
+        return(model.StorageVolume[i] == StorageVolume + FactorWaterInflow[i] * WaterInflowTotal - model.PowerGeneratingWater[i] - DemandWater[i]+ model.StorageExcess[i])
 
 model.MaxStorageCapacity = Constraint(model.T, rule=MaxStorageCapacity_rule)
 
@@ -166,6 +174,7 @@ PVOutput = []; DamOutput = []
 GenerationWaterUsed = []; Storage = [0]
 WaterInflow = [0]
 PExcess = []
+StorageVolume = []
 for i in model.T:
     Hour.append(i)
     WindOutput.append(round(FactorWind[i]*model.Pwind.value,2))
@@ -175,6 +184,7 @@ for i in model.T:
     Storage.append(round((model.StorageSize + sum((FactorWaterInflow[i] * WaterInflowTotal) for i in range(1,i)) - sum(model.PowerGeneratingWater[i].value for i in range(1,i)) -sum(DemandWater[i] for i in range(1,i))),2))
     WaterInflow.append(round((FactorWaterInflow[i] * WaterInflowTotal),2))
     PExcess.append(round((model.PExcess[i].value),2))
+    StorageVolume.append(round((model.StorageVolume[i].value),2))
 
 Results = pd.DataFrame({'Hour': pd.Series(Hour), 
                         'Energy Demand': pd.Series(DemandEnergy[1:]),
@@ -187,8 +197,9 @@ Results = pd.DataFrame({'Hour': pd.Series(Hour),
                         'Factor PV': pd.Series(FactorPv[1:]),
                         'Storage': pd.Series(Storage[1:]),
                         'Water Inflow': pd.Series(WaterInflow[1:]),
-                        'Excess': pd.Series(PExcess)},
-                        columns=['Hour','Energy Demand','Water Demand','Wind Output','PV Output','Dam Output','Turbine Water','Factor Wind','Factor PV','Storage','Water Inflow','Excess'])
+                        'Excess': pd.Series(PExcess),
+                        'Storage Level': pd.Series(StorageVolume)},
+                        columns=['Hour','Energy Demand','Water Demand','Wind Output','PV Output','Dam Output','Turbine Water','Factor Wind','Factor PV','Storage','Water Inflow','Excess','Storage Level'])
 Results.index = Results.index + 1
 
 
