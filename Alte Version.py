@@ -22,9 +22,7 @@ import matplotlib.patches as mpatches
 #SpeicherWiederVoll = int(input('Bis wann soll der Speicher wieder voll sein? (Idealerweise = Calculated Hours): '))
 #RiverFlowFactor = float(input('Wieviel Prozent des Flusses von 2017 von der Fluss haben?' ))
 #Anzeige = int(input("Bis welcher Stunde möchtest du die Werte ansehen: "))
-WaterFlowFactor = int(input('Wie viel Prozent des Wasserzuflusses von 2017 ist noch vorhanden? '))
-print('Wait...')
-
+WaterFlowFactor = 10 #int(input('Wie viel Prozent des Wasserzuflusses von 2017 ist noch vorhanden? '))
 data = pd.read_csv('data.csv', header=0)
 model = ConcreteModel()
 model.T = [i for i in range(0,8760)]
@@ -50,9 +48,9 @@ LifeTimePv = 25
 StorageSize = 6240000 #m^3 Beschränkt
 Pdam = 260 #MW
 FactorDam = 20547 #m^3 Water per MW
-WaterInflow = 0.01*WaterFlowFactor*data['riverflow_absolut']
+WaterInflow = 0.01 * WaterFlowFactor * data['riverflow_absolut']
 Cdam = 0 #€/MWh
-DamBalance_Start = StorageSize/2
+DamBalance_Start = 5
 
 #Demand
 DemandFactor_Energy = data['energy_demand_normed']
@@ -60,7 +58,10 @@ DemandTotal_Energy = 71737.392 #MWh Total
 
 #Costcalculation
 DemandEnergy = [(DemandTotal_Energy * DemandFactor_Energy[i]) for i in model.T]
-DemandWater = [(data.loc[i,'water_demand_absolut']) for i in model.T]
+DemandWater = data['water_demand_absolut']
+
+print("Maximaler Wasserzufluss > Maximaler Demand", max(DemandWater) > WaterInflow.max())
+print('Wait...')
 
 #==============================================================================
 # ------------MODEL CONSTRUCTION------------
@@ -78,19 +79,19 @@ Es sollten noch alle statischen Variablen die im Modell verwendet werden als Par
 model.Cwind = Param(initialize=Cwind) #Price per MW Wind €/MWh
 model.Cpv = Param(initialize=Cpv) #Price per MW PV €/MWh
 model.Cdam = Param(initialize=Cdam) #Price of Water €/MWh
-model.StorageSize= Param(initialize=StorageSize) #m^3
+model.StorageSize = Param(initialize=StorageSize) #m^3
 model.DamBalance_Start = Param(initialize=DamBalance_Start)
-model.DamMax = Param(initialize=StorageSize)
 
 #Variablen
 model.Pwind = Var(domain=NonNegativeReals) #installed MW Wind
 model.Ppv = Var(domain=NonNegativeReals) #installed MW Wind
 model.PowerGeneratingWater = Var(model.T, domain=NonNegativeReals) #used M^3 Water for Electricity Generation @ hour X
-model.DamBalance = Var(model.T, bounds = (0,StorageSize))
+model.DamBalance = Var(model.T, bounds = (0, StorageSize))
 
 #==============================================================================
 # ----------Constraint & Objective & Solver------------
 #==============================================================================
+
 #------Objective Function-------
 #€/MW * MW + €/MW + m^3(gesamt) * MWh/m^3 * €/MWh, Ziel: Minimieren
 def obj_rule(model):
@@ -107,7 +108,6 @@ def DemandEnergy_rule(model, i):
 model.EnergyDemand = Constraint(model.T, rule=DemandEnergy_rule)
 
 #Limitation through Turbine Capacity
-#Benutztes Wasser für Energieerzeugung @ hour X (m^3) * Faktor (MW/m^3) (= Wasserturbinenleistung @ hour X) <= Maximale Turbinenleistung
 def MaxWaterPower_rule(model, i):
     return(model.PowerGeneratingWater[i]/FactorDam <= Pdam)
 
@@ -123,19 +123,28 @@ def WaterUsage_rule(model, i):
         
 model.WaterDemand = Constraint(model.T, rule=WaterUsage_rule)
 
+def StorageLimitations_rule(model, i):
+    if i == 0:
+        return Constraint.Skip
+    else:
+        return(model.PowerGeneratingWater[i] <= model.DamBalance[i-1])
+    
+model.FICKDICH = Constraint(model.T, rule=StorageLimitations_rule)
+
 def DamEndLvl_rule(model, i):
     return(model.DamBalance[8759] == model.DamBalance_Start)
 
 model.DamEndLvl = Constraint(model.T, rule=DamEndLvl_rule)
 
-#def StorageMax_rule(model,i):
-#    return(model.DamBalance[i] <= StorageSize)
+#def StorageMax_rule(model, i):
+#    if i > 1:
+#        return(model.DamBalance[i] <= model.StorageSize[i])
 #
-#model.StorageSize = Constraint(model.T, rule=StorageMax_rule)
+##model.StorageSize = Constraint(model.T, rule=StorageMax_rule)
 
 
 #------SOLVER---------
-opt = SolverFactory('glpk')
+opt = SolverFactory('gurobi')
 model.write('optimization_problem.lp',
          io_options={'symbolic_solver_labels': True})
 results = opt.solve(model, tee=True)
@@ -159,9 +168,7 @@ for i in model.T:
     GenerationWaterUsed.append(model.PowerGeneratingWater[i].value)
     WaterBalance.append(WaterInflow[i] - model.PowerGeneratingWater[i].value - DemandWater[i])
     River.append(WaterInflow[i])
-    
-for i in model.T:
-        Storage.append(model.DamBalance[i].value)
+    Storage.append(model.DamBalance[i].value)
 
 Results = pd.DataFrame({"Hour": pd.Series(Hour), 
                         "Energy Demand": pd.Series(DemandEnergy),
@@ -183,8 +190,8 @@ Results = (np.round(Results, decimals=2))
 # ------------Plotting------------
 #==============================================================================
 
-AnzeigeAnfang = int(input("Ab welcher Stunde möchtest du die Werte ansehen: "))
-AnzeigeEnde = int(input("Bis welcher Stunde möchtest du die Werte ansehen: "))
+AnzeigeAnfang = 0 #int(input("Ab welcher Stunde möchtest du die Werte ansehen: "))
+AnzeigeEnde = 8760 #int(input("Bis welcher Stunde möchtest du die Werte ansehen: "))
 
 ResultsGraph = Results[AnzeigeAnfang:AnzeigeEnde]
 demand = ResultsGraph['Energy Demand']
