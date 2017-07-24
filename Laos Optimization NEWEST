@@ -44,7 +44,7 @@ StorageSize = 6240000 #m^3
 Pdam = 260 #MW
 FactorDam = 20547 #m^3 Water per MW
 WaterInflow = 0.01 * WaterFlowFactor * data['riverflow_absolut']
-Cdam = 0 #€/MWh
+Cdam = 0.0001 #€/MWh
 DamBalance_Start = StorageSize / 2
 
 #Demand
