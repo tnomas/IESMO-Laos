@@ -43,13 +43,11 @@ To-Do (Wegstreichen wenn fertig):
 '''     
     
 #Wind
-CostWind = 77350 #€/MW/a 
-LifetimeWind = 20 #a
+Cwind = 77350 #€/MW/a 
 FactorWind = [0]+[(data.loc[i,'windfactor']*8760) for i in model.T]  #Wind Factor @ hour X
 
 #PV
-CostPv = 37120 #€/MWp/a
-LifetimePv= 25 #a
+Cpv = 37120 #€/MWp/a
 FactorPv = [0]+[(data.loc[i,'pvfactor']*8760) for i in model.T]  #Radiation Factor @ hour X
 
 #Dam
@@ -65,8 +63,6 @@ DemandFactor_Energy = data['energy_demand_normed']
 DemandTotal_Energy = 71737.392 #MWh Total
 
 #Costcalculation
-Cwind = CostWind/LifetimeWind #€/MW Wind, 1 year only
-Cpv = CostPv/LifetimePv #€/MW PV, 1 year only
 DemandEnergy = [0]+[(DemandTotal_Energy * DemandFactor_Energy[i]) for i in data.index]
 DemandWater = [0]+[(data.loc[i,'water_demand_absolut']) for i in model.T]
 
@@ -100,7 +96,7 @@ model.PowerGeneratingWater = Var(model.T, domain=NonNegativeReals) #used M^3 Wat
 #------Objective Function-------
 #€/MW * MW + €/MW + m^3(gesamt) * MWh/m^3 * €/MWh, Ziel: Minimieren
 def obj_rule(model):
-        return(model.Cwind * model.Pwind + model.Cpv * model.Ppv + sum(model.PowerGeneratingWater[i] for i in model.T)/FactorDam * Cdam)
+        return(model.Cwind * model.Pwind + model.Cpv * model.Ppv + sum(model.PowerGeneratingWater[i] for i in model.T)/FactorDam * model.Cdam)
     
 model.cost = Objective(sense=minimize, rule=obj_rule)
     

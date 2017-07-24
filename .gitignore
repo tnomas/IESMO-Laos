@@ -2,3 +2,4 @@
 .DS_Store
 .~lock.data.csv#
 optimization_problem.lp
+*.lp
