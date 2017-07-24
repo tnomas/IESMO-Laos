@@ -2,16 +2,6 @@
 
 min 
 cost:
-+0.0001 PowerGeneratingWater(1)
-+0.0001 PowerGeneratingWater(10)
-+0.0001 PowerGeneratingWater(2)
-+0.0001 PowerGeneratingWater(3)
-+0.0001 PowerGeneratingWater(4)
-+0.0001 PowerGeneratingWater(5)
-+0.0001 PowerGeneratingWater(6)
-+0.0001 PowerGeneratingWater(7)
-+0.0001 PowerGeneratingWater(8)
-+0.0001 PowerGeneratingWater(9)
 +37120 Ppv
 +77350 Pwind
 
@@ -19,56 +9,56 @@ s.t.
 
 c_l_EnergyDemand(1)_:
 +0.0001 PowerGeneratingWater(1)
-+631.88799999999708 Pwind
++0.072133333333332994 Pwind
 >= 5.6008825329216005
 
 c_l_EnergyDemand(2)_:
 +0.0001 PowerGeneratingWater(2)
-+1211.2160000000029 Pwind
++0.13826666666666698 Pwind
 >= 5.7845159089632006
 
 c_l_EnergyDemand(3)_:
 +0.0001 PowerGeneratingWater(3)
-+697.29600000000005 Pwind
++0.079600000000000004 Pwind
 >= 6.2436065228064006
 
 c_l_EnergyDemand(4)_:
 +0.0001 PowerGeneratingWater(4)
-+262.21599999999705 Pwind
++0.029933333333332996 Pwind
 >= 6.9781472007120016
 
 c_l_EnergyDemand(5)_:
 +0.0001 PowerGeneratingWater(5)
-+220.75200000000001 Pwind
++0.0252 Pwind
 >= 7.8045260878559999
 
 c_l_EnergyDemand(6)_:
 +0.0001 PowerGeneratingWater(6)
-+262.21599999999705 Pwind
++0.029933333333332996 Pwind
 >= 8.3553975210240008
 
 c_l_EnergyDemand(7)_:
 +0.0001 PowerGeneratingWater(7)
-+1116.5194655999999 Ppv
-+303.68000000000291 Pwind
++0.12745656 Ppv
++0.034666666666666998 Pwind
 >= 8.6308691063040008
 
 c_l_EnergyDemand(8)_:
 +0.0001 PowerGeneratingWater(8)
-+2214.5840639999997 Ppv
-+513.92000000000291 Pwind
++0.25280639999999999 Ppv
++0.058666666666666999 Pwind
 >= 8.9981645533440009
 
 c_l_EnergyDemand(9)_:
 +0.0001 PowerGeneratingWater(9)
-+3155.7822911999997 Ppv
-+762.70400000000302 Pwind
++0.36024911999999998 Ppv
++0.087066666666667014 Pwind
 >= 8.7226929680640009
 
 c_l_EnergyDemand(10)_:
 +0.0001 PowerGeneratingWater(10)
-+3843.2260944 Ppv
-+1386.999999999997 Pwind
++0.43872443999999999 Ppv
++0.15833333333333299 Pwind
 >= 8.6308691063040008
 
 c_u_MaxWaterPower(1)_:

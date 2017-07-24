@@ -44,15 +44,15 @@ To-Do (Wegstreichen wenn fertig):
     
 #Wind
 Cwind = 77350 #€/MW/a 
-FactorWind = [0]+[(data.loc[i,'windfactor']*8760) for i in model.T]  #Wind Factor @ hour X
+FactorWind = [0]+[(data.loc[i,'windfactor']) for i in model.T]  #Wind Factor @ hour X
 
 #PV
 Cpv = 37120 #€/MWp/a
-FactorPv = [0]+[(data.loc[i,'pvfactor']*8760) for i in model.T]  #Radiation Factor @ hour X
+FactorPv = [0]+[(data.loc[i,'pvfactor']) for i in model.T]  #Radiation Factor @ hour X
 
 #Dam
 StorageSize = 9000000 #m^3 Beschränkt
-Pdam = 100 #MW
+Pdam = 260 #MW
 FactorDam = 10000 #m^3 Water per MW
 FactorWaterInflow = [0] + [data.loc[i,'riverflow_normed'] for i in model.T]
 WaterInflowTotal = 1529431.498 * 1000 #m^3
