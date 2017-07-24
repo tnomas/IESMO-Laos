@@ -5,53 +5,49 @@ Created on Thu Jul 13 17:52:14 2017
 @author: nilshoffmann
 """
 
-from pyomo.environ import ConcreteModel, Param, Var, Set, Constraint, Objective
+from pyomo.environ import ConcreteModel, Param, Var, Constraint, Objective
 from pyomo.environ import minimize, NonNegativeReals
 from pyomo.opt import SolverFactory
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 
-#==============================================================================
+# ==============================================================================
 # --------Initialize-----------
-#==============================================================================
+# ==============================================================================
 
-WaterFlowFactor = 10 #int(input('Wie viel Prozent des Wasserzuflusses von 2017 ist noch vorhanden? '))
+WaterFlowFactor = 10
 data = pd.read_csv('data.csv', header=0)
 model = ConcreteModel()
-model.T = [i for i in range(0,8760)]
+model.T = [i for i in range(0, 8760)]
 
-#==============================================================================
+# ==============================================================================
 # ------------Variables------------
-#==============================================================================
-'''Hier werden die Variablen der einzelnen Technologien und Demands deklariert
-To-Do (Wegstreichen wenn fertig):
-'''     
-    
-#Wind
-Cwind = 77350 #€/MW/a 
-FactorWind = data['windfactor'] #Wind Factor @ hour X
+# ==============================================================================
+
+# Wind
+Cwind = 77350  # €/MW/a
+FactorWind = data['windfactor']  # Wind Factor @ hour X
 LifeTimeWind = 20
 
-#PV
-Cpv = 37120 #€/MWp/a
-FactorPv = data['pvfactor'] #Radiation Factor @ hour X
+# PV
+Cpv = 37120  # €/MWp/a
+FactorPv = data['pvfactor']  # Radiation Factor @ hour X
 LifeTimePv = 25
 
-#Dam
-StorageSize = 6240000 #m^3
-Pdam = 260 #MW
-FactorDam = 20547 #m^3 Water per MW
+# Dam
+StorageSize = 6240000  # m^3
+Pdam = 260  # MW
+FactorDam = 20547  # m^3 Water per MW
 WaterInflow = 0.01 * WaterFlowFactor * data['riverflow_absolut']
-Cdam = 0.0001 #€/MWh
+Cdam = 0.0001  # €/MWh
 DamBalance_Start = StorageSize / 2
 
-#Demand
+# Demand
 DemandFactor_Energy = data['energy_demand_normed']
-DemandTotal_Energy = 71737.392 #MWh Total
+DemandTotal_Energy = 71737.392  # MWh Total
 
-#Costcalculation
+# Costcalculation
 DemandEnergy = [(DemandTotal_Energy * DemandFactor_Energy[i]) for i in model.T]
 DemandWater = data['water_demand_absolut']
 
