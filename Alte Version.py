@@ -43,13 +43,13 @@ To-Do (Wegstreichen wenn fertig):
 '''     
     
 #Wind
-CostWind = 1000000 #€/MW Muss noch realisitisch gemacht werden
+CostWind = 77350 #€/MW/a 
 LifetimeWind = 20 #a
 FactorWind = [0]+[(data.loc[i,'windfactor']*8760) for i in model.T]  #Wind Factor @ hour X
 
 #PV
-CostPv = 10000 #€/MWp
-LifetimePv= 20 #a
+CostPv = 37120 #€/MWp/a
+LifetimePv= 25 #a
 FactorPv = [0]+[(data.loc[i,'pvfactor']*8760) for i in model.T]  #Radiation Factor @ hour X
 
 #Dam
