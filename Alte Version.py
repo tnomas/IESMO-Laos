@@ -22,7 +22,7 @@ import time
 calc_hours = int(input('How many hours should be calculated?: '))
 SpeicherWiederVoll = 1
 SpeicherWiederVoll = int(input('Bis wann soll der Speicher wieder voll sein? (Idealerweise = Calculated Hours): '))
-RiverFlowFactor = int(input('Wieviel Prozent des Flusses von 2017 von der Fluss haben?' ))
+#RiverFlowFactor = float(input('Wieviel Prozent des Flusses von 2017 von der Fluss haben?' ))
 print('Wait...')
 
 data = pd.read_csv('data.csv', header=0, index_col = 0, nrows = calc_hours)
@@ -52,10 +52,10 @@ Cpv = 37120 #€/MWp/a
 FactorPv = [0]+[(data.loc[i,'pvfactor']) for i in model.T]  #Radiation Factor @ hour X
 
 #Dam
-StorageSize = 9000000000 #m^3 Beschränkt
+StorageSize = 90000000 #m^3 Beschränkt
 Pdam = 260 #MW
 FactorDam = 10000 #m^3 Water per MW
-WaterInflow = [0] + [(0.01 * RiverFlowFactor * data.loc[i,'riverflow_absolut']) for i in model.T]
+WaterInflow = [0] + [(data.loc[i,'riverflow_absolut']) for i in model.T]
 WaterInflowTotal = 1529431.498 * 1000 #m^3
 Cdam = 0 #€/MWh
 
@@ -136,10 +136,11 @@ def MaxStorageCapacity_rule (model,i):
 
 model.MaxStorageCapacity = Constraint(model.T, rule=MaxStorageCapacity_rule)
 
+
 def StorageSameAsBefore_rule (model,i):
     return(model.StorageSize == model.StorageSize + sum(WaterInflow[i] for i in range(1,SpeicherWiederVoll)) - sum(model.PowerGeneratingWater[i] for i in range(1,SpeicherWiederVoll)) - sum(DemandWater[i] for i in range(1,SpeicherWiederVoll)))
 
-#model.StorageSameAsBefore = Constraint(model.T, rule=StorageSameAsBefore_rule)
+model.StorageSameAsBefore = Constraint(model.T, rule=StorageSameAsBefore_rule)
 
 #------SOLVER---------
 opt = SolverFactory('glpk')
