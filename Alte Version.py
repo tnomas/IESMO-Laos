@@ -22,6 +22,7 @@ import time
 calc_hours = int(input('How many hours should be calculated?: '))
 SpeicherWiederVoll = 1
 SpeicherWiederVoll = int(input('Bis wann soll der Speicher wieder voll sein? (Idealerweise = Calculated Hours): '))
+RiverFlowFactor = int(input('Wieviel Prozent des Flusses von 2017 von der Fluss haben?' ))
 print('Wait...')
 
 data = pd.read_csv('data.csv', header=0, index_col = 0, nrows = calc_hours)
@@ -51,10 +52,10 @@ Cpv = 37120 #€/MWp/a
 FactorPv = [0]+[(data.loc[i,'pvfactor']) for i in model.T]  #Radiation Factor @ hour X
 
 #Dam
-StorageSize = 9000000 #m^3 Beschränkt
+StorageSize = 9000000000 #m^3 Beschränkt
 Pdam = 260 #MW
 FactorDam = 10000 #m^3 Water per MW
-FactorWaterInflow = [0] + [data.loc[i,'riverflow_normed'] for i in model.T]
+WaterInflow = [0] + [(0.01 * RiverFlowFactor * data.loc[i,'riverflow_absolut']) for i in model.T]
 WaterInflowTotal = 1529431.498 * 1000 #m^3
 Cdam = 0 #€/MWh
 
@@ -124,21 +125,21 @@ Wasser für Energieerzeugung <=  Speichergröße (komplette Füllung am Anfang)
                                -Summe bis Stunde X Wasserverbrauch für Demand'''
 
 def WaterUsage_rule(model, i):
-    return(model.PowerGeneratingWater[i] <= model.StorageSize + sum((FactorWaterInflow[i] * WaterInflowTotal) for i in range(1,i)) - sum(model.PowerGeneratingWater[i] for i in range(1,i)) - sum(DemandWater[i] for i in range(1,i)))
+    return(model.PowerGeneratingWater[i] <= model.StorageSize + sum(WaterInflow[i] for i in range(1,i)) - sum(model.PowerGeneratingWater[i] for i in range(1,i)) - sum(DemandWater[i] for i in range(1,i)))
 
 model.WaterDemand = Constraint(model.T, rule=WaterUsage_rule)
 
 #Never Store more than possible
 #Selbes Prinzip wie bei WaterUsage_rule, dieses mal darf es nicht mehr Wasser als die Speichergröße model.StorageSize werden
 def MaxStorageCapacity_rule (model,i):
-    return(model.StorageSize >= model.StorageSize + sum((FactorWaterInflow[i] * WaterInflowTotal) for i in range(1,i)) - sum(model.PowerGeneratingWater[i] for i in range(1,i)) - sum(DemandWater[i] for i in range(1,i)))
+    return(model.StorageSize >= model.StorageSize + sum(WaterInflow[i] for i in range(1,i)) - sum(model.PowerGeneratingWater[i] for i in range(1,i)) - sum(DemandWater[i] for i in range(1,i)))
 
 model.MaxStorageCapacity = Constraint(model.T, rule=MaxStorageCapacity_rule)
 
 def StorageSameAsBefore_rule (model,i):
-    return(model.StorageSize == model.StorageSize + sum((FactorWaterInflow[i] * WaterInflowTotal) for i in range(1,SpeicherWiederVoll)) - sum(model.PowerGeneratingWater[i] for i in range(1,SpeicherWiederVoll)) - sum(DemandWater[i] for i in range(1,SpeicherWiederVoll)))
+    return(model.StorageSize == model.StorageSize + sum(WaterInflow[i] for i in range(1,SpeicherWiederVoll)) - sum(model.PowerGeneratingWater[i] for i in range(1,SpeicherWiederVoll)) - sum(DemandWater[i] for i in range(1,SpeicherWiederVoll)))
 
-model.StorageSameAsBefore = Constraint(model.T, rule=StorageSameAsBefore_rule)
+#model.StorageSameAsBefore = Constraint(model.T, rule=StorageSameAsBefore_rule)
 
 #------SOLVER---------
 opt = SolverFactory('glpk')
@@ -163,9 +164,9 @@ for i in model.T:
     PVOutput.append(FactorPv[i]*model.Ppv.value)
     DamOutput.append(model.PowerGeneratingWater[i].value/FactorDam)
     GenerationWaterUsed.append(model.PowerGeneratingWater[i].value)
-    Storage.append(model.StorageSize + sum((FactorWaterInflow[i] * WaterInflowTotal) for i in range(1,i)) - sum(model.PowerGeneratingWater[i].value for i in range(1,i)) -sum(DemandWater[i] for i in range(1,i)))
-    WaterBalance.append((FactorWaterInflow[i] * WaterInflowTotal) - model.PowerGeneratingWater[i].value - DemandWater[i])
-    River.append(FactorWaterInflow[i] * WaterInflowTotal)
+    Storage.append(model.StorageSize + sum(WaterInflow[i] for i in range(1,i)) - sum(model.PowerGeneratingWater[i].value for i in range(1,i)) -sum(DemandWater[i] for i in range(1,i)))
+    WaterBalance.append(WaterInflow[i] - model.PowerGeneratingWater[i].value - DemandWater[i])
+    River.append(WaterInflow[i])
 
 Results = pd.DataFrame({"Hour": pd.Series(Hour), 
                         "Energy Demand": pd.Series(DemandEnergy[1:]),
