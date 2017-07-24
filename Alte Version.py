@@ -43,13 +43,13 @@ To-Do (Wegstreichen wenn fertig):
 '''     
     
 #Wind
-CostWind = 77350 #€/MW/a 
+CostWind = 1000000 #€/MW Muss noch realisitisch gemacht werden
 LifetimeWind = 20 #a
 FactorWind = [0]+[(data.loc[i,'windfactor']*8760) for i in model.T]  #Wind Factor @ hour X
 
 #PV
-CostPv = 37120 #€/MWp/a
-LifetimePv= 25 #a
+CostPv = 10000 #€/MWp
+LifetimePv= 20 #a
 FactorPv = [0]+[(data.loc[i,'pvfactor']*8760) for i in model.T]  #Radiation Factor @ hour X
 
 #Dam
@@ -120,7 +120,7 @@ def MaxWaterPower_rule(model, i):
 model.MaxWaterPower = Constraint(model.T, rule=MaxWaterPower_rule)
 
 #Always fullfil Water Demand
-'''Hier muss für jede Stunde immer die aktuelle Situation des Speichers berechnet werden, ein Auslagern auf eine Variable ist wegen Pyomo nicht möglich
+'''Hier muss für jede S8tunde immer die aktuelle Situation des Speichers berechnet werden, ein Auslagern auf eine Variable ist wegen Pyomo nicht möglich
 darf aber gerne versucht werden! Evtl. muss die Stunde angepasst werden (i+-1)
 Wasser für Energieerzeugung <=  Speichergröße (komplette Füllung am Anfang)
                                +Summe bis Stunde X Zufluss
