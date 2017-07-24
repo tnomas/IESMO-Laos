@@ -51,82 +51,88 @@ DemandTotal_Energy = 71737.392  # MWh Total
 DemandEnergy = [(DemandTotal_Energy * DemandFactor_Energy[i]) for i in model.T]
 DemandWater = data['water_demand_absolut']
 
-print("Maximaler Wasserzufluss > Maximaler Demand", max(DemandWater) > WaterInflow.max())
 print('Wait...')
 
-#==============================================================================
+# ==============================================================================
 # ------------MODEL CONSTRUCTION------------
-#==============================================================================
-#Parameter
-model.Cwind = Param(initialize=Cwind) #Price per MW Wind €/MWh
-model.Cpv = Param(initialize=Cpv) #Price per MW PV €/MWh
-model.Cdam = Param(initialize=Cdam) #Price of Water €/MWh
-model.StorageSize = Param(initialize=StorageSize) #m^3
+# ==============================================================================
+# Parameter
+model.Cwind = Param(initialize=Cwind)  # Price per MW Wind €/MWh
+model.Cpv = Param(initialize=Cpv)  # Price per MW PV €/MWh
+model.Cdam = Param(initialize=Cdam)  # Price of Water €/MWh
+model.StorageSize = Param(initialize=StorageSize)  # m^3
 model.DamBalance_Start = Param(initialize=DamBalance_Start)
 
-#Variablen
-model.Pwind = Var(domain=NonNegativeReals) #installed MW Wind
-model.Ppv = Var(domain=NonNegativeReals) #installed MW Wind
-model.PowerGeneratingWater = Var(model.T, domain=NonNegativeReals) #used M^3 Water for Electricity Generation @ hour X
-model.DamBalance = Var(model.T, bounds = (20000, StorageSize))
+# Variablen
+model.Pwind = Var(domain=NonNegativeReals)  # installed MW Wind
+model.Ppv = Var(domain=NonNegativeReals)  # installed MW Wind
+model.PowerGeneratingWater = Var(model.T, domain=NonNegativeReals)  # used M^3 Water for Electricity Generation @ hour X
+model.DamBalance = Var(model.T, bounds=(20000, StorageSize))
 
-#==============================================================================
+# ==============================================================================
 # ----------Constraint & Objective & Solver------------
-#==============================================================================
+# ==============================================================================
 
-#------Objective Function-------
-#€/MW * MW + €/MW + m^3(gesamt) * MWh/m^3 * €/MWh, Ziel: Minimieren
+# ------Objective Function-------
+# €/MW * MW + €/MW + m^3(gesamt) * MWh/m^3 * €/MWh, Ziel: Minimieren
 def obj_rule(model):
-        return(model.Cwind * model.Pwind + model.Cpv * model.Ppv + sum(model.PowerGeneratingWater[i] for i in model.T)/FactorDam * model.Cdam)
-    
+        return(model.Cwind * model.Pwind + model.Cpv * model.Ppv + 
+               sum(model.PowerGeneratingWater[i] for i in model.T)/FactorDam *
+               model.Cdam)
+
 model.cost = Objective(sense=minimize, rule=obj_rule)
-    
-#----CONSTRAINTS-------
-#Fullfil Demand
+
+# ----CONSTRAINTS-------
+# Fullfil Demand
 def DemandEnergy_rule(model, i):
-    return (model.Pwind * FactorWind[i] + model.Ppv * FactorPv[i] + model.PowerGeneratingWater[i]/FactorDam >= DemandEnergy[i])
+    return (model.Pwind * FactorWind[i] + model.Ppv * FactorPv[i] +
+            model.PowerGeneratingWater[i]/FactorDam >= DemandEnergy[i])
 
 model.EnergyDemand = Constraint(model.T, rule=DemandEnergy_rule)
 
-#Limitation through Turbine Capacity
+
+# Limitation through Turbine Capacity
 def MaxWaterPower_rule(model, i):
     return(model.PowerGeneratingWater[i]/FactorDam <= Pdam)
 
 model.MaxWaterPower = Constraint(model.T, rule=MaxWaterPower_rule)
 
-#Calculate Storage
+
+# Calculate Storage
 def WaterUsage_rule(model, i):
     if i == 0:
         return(model.DamBalance[i] == model.DamBalance_Start)
-    else:   
-        return(model.DamBalance[i] == model.DamBalance[i-1] + WaterInflow[i] - model.PowerGeneratingWater[i] - DemandWater[i])
-        
+    else:
+        return(model.DamBalance[i] == model.DamBalance[i-1] + WaterInflow[i] -
+               model.PowerGeneratingWater[i] - DemandWater[i])
+
 model.WaterDemand = Constraint(model.T, rule=WaterUsage_rule)
 
-#Dont use more Water than in Storage
+# Dont use more Water than in Storage
 def GenerationWaterLimit_rule(model, i):
     if i == 0:
         return(model.PowerGeneratingWater[i] <= model.DamBalance_Start)
     else:
         return(model.PowerGeneratingWater[i] <= model.DamBalance[i])
-    
+
 model.GenerationWaterLimit = Constraint(model.T, rule=GenerationWaterLimit_rule)
 
-#Same Storage in the End level like @ hour 1
+
+# Same Storage in the End level like @ hour 1
 def DamEndLvl_rule(model, i):
     return(model.DamBalance[8759] == model.DamBalance_Start)
 
 model.DamEndLvl = Constraint(model.T, rule=DamEndLvl_rule)
 
-#------SOLVER---------
+# ------SOLVER---------
 opt = SolverFactory('glpk')
 model.write('optimization_problem.lp',
          io_options={'symbolic_solver_labels': True})
 results = opt.solve(model, tee=True)
 
-#==============================================================================
+# ==============================================================================
 # ------------Results------------
-#==============================================================================
+# ==============================================================================
 Hour = []
 WindOutput = []
 EnergyDemand = []; WaterDemand = []
