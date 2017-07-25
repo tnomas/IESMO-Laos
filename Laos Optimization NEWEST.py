@@ -32,13 +32,13 @@ model.T = [i for i in range(0, 8760)]
 
 # Wind
 Cwind = 77350  # €/MW/a
-Cwind_var = 0.001
+Cwind_var = 2
 FactorWind = data['windfactor']  # Wind Factor @ hour X
 LifeTimeWind = 20
 
 # PV
 Cpv = 37120  # €/MWp/a
-Cpv_var = 0.001
+Cpv_var = 2
 FactorPv = data['pvfactor']  # Radiation Factor @ hour X
 LifeTimePv = 25
 
@@ -47,7 +47,7 @@ StorageSize = 6240000  # m^3
 Pdam = 260  # MW
 FactorDam = 20547  # m^3 Water per MW
 WaterInflow = 0.01 * WaterFlowFactor * inflow #data['riverflow_absolut']
-Cdam = 0  # €/MWh
+Cdam = 1  # €/MWh
 DamBalance_Start = StorageSize / 2
 Expensive = 9999999999
 
