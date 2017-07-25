@@ -12,7 +12,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime
-import time
 
 # ==============================================================================
 # --------Initialize-----------
@@ -30,15 +29,20 @@ model.T = [i for i in range(0, 8760)]
 # ------------Variables------------
 # ==============================================================================
 
+#Priorities
+Prio_Storage = 1 # Verhalten Storage (0 = leeren, !0 = voll)
+Prio_Wind = 2
+Prio_PV = 2
+Cdam = 3
+
+
 # Wind
 Cwind = 77350  # €/MW/a
-Cwind_var = 2
 FactorWind = data['windfactor']  # Wind Factor @ hour X
 LifeTimeWind = 20
 
 # PV
 Cpv = 37120  # €/MWp/a
-Cpv_var = 2
 FactorPv = data['pvfactor']  # Radiation Factor @ hour X
 LifeTimePv = 25
 
@@ -47,9 +51,8 @@ StorageSize = 6240000  # m^3
 Pdam = 260  # MW
 FactorDam = 20547  # m^3 Water per MW
 WaterInflow = 0.01 * WaterFlowFactor * inflow #data['riverflow_absolut']
-Cdam = 1  # €/MWh
 DamBalance_Start = StorageSize / 2
-Expensive = 9999999999
+Expensive = 99999999
 
 # Demand
 DemandFactor_Energy = data['energy_demand_normed']
@@ -67,9 +70,9 @@ print('Wait...')
 # ==============================================================================
 # Parameter
 model.Cwind = Param(initialize=Cwind)  # Price per MW Wind €/MWh
-model.Cwind_var = Param(initialize=Cwind_var)
+model.Prio_Wind = Param(initialize=Prio_Wind)
 model.Cpv = Param(initialize=Cpv)  # Price per MW PV €/MWh
-model.Cpv_var = Param(initialize=Cpv_var)
+model.Prio_PV = Param(initialize=Prio_PV)
 model.Cdam = Param(initialize=Cdam)  # Price of Water €/MWh
 model.StorageSize = Param(initialize=StorageSize)  # m^3
 model.DamBalance_Start = Param(initialize=DamBalance_Start)
@@ -94,15 +97,16 @@ model.Overflow = Var(model.T, domain=NonNegativeReals)
 # ------Objective Function-------
 # €/MW * MW + €/MW + m^3(gesamt) * MWh/m^3 * €/MWh, Ziel: Minimieren
 
-i = 0
 def obj_rule(model):
         return(model.Cwind * model.Pwind + model.Cpv * model.Ppv +
-               sum(model.Pwind_Usage[i] for i in model.T) * model.Cwind_var +
-               sum(model.Ppv_Usage[i] for i in model.T) * model.Cpv_var +
+               sum(model.Pwind_Usage[i] for i in model.T) * model.Prio_Wind +
+               sum(model.Ppv_Usage[i] for i in model.T) * model.Prio_PV +
                sum(model.PowerGeneratingWater[i] for i in model.T)/FactorDam * model.Cdam +
-               (model.Overflow[i] + model.Ppv_Over[i] + model.Pwind_Over[i]) * model.Expensive)
+               sum((model.Ppv_Over[i] + model.Pwind_Over[i] + model.Overflow[i]) for i in model.T) * model.Expensive -
+               sum((model.DamBalance[i]) for i in model.T) * Prio_Storage)
 
 model.cost = Objective(sense=minimize, rule=obj_rule)
+
 
 # ----CONSTRAINTS-------
 # Fullfil Demand
@@ -132,9 +136,9 @@ model.MaxPvPower = Constraint(model.T, rule=MaxPvPower_rule)
 # Calculate Storage
 def WaterUsage_rule(model, i):
     if i == 0:
-        return(model.DamBalance[i] == model.DamBalance_Start)
-    if i == 8759:
-        return(model.DamBalance[8759] == model.DamBalance_Start)
+        return(model.DamBalance[i] == model.DamBalance_Start - model.Overflow[i])
+    #if i == 8759:
+        #return(model.DamBalance[8759] == model.DamBalance_Start)
     else:
         return(model.DamBalance[i] == model.DamBalance[i-1] + WaterInflow[i] -
                model.PowerGeneratingWater[i] - DemandWater[i] *
@@ -145,24 +149,24 @@ model.WaterDemand = Constraint(model.T, rule=WaterUsage_rule)
 # Dont use more Water than in Storage
 
 
-def GenerationWaterLimit_rule(model, i):
-    if i == 0:
-        return(model.PowerGeneratingWater[i] + DemandWater[i] *
-               DemandWater_Factor - WaterInflow[i] +
-               model.Overflow[i] <= model.DamBalance_Start)
-    else:
-        return(model.PowerGeneratingWater[i] + DemandWater[i] *
-               DemandWater_Factor - WaterInflow[i] +
-               model.Overflow[i] <= model.DamBalance[i])
-
-model.GenerationWaterLimit = Constraint(model.T, rule=GenerationWaterLimit_rule)
-
-
-## Same Storage in the End level like @ hour 1
-#def DamEndLvl_rule(model, i):
-#    return(model.DamBalance[8759] == model.DamBalance_Start)
+#def GenerationWaterLimit_rule(model, i):
+#    if i == 0:
+#        return(model.PowerGeneratingWater[i] + DemandWater[i] *
+#               DemandWater_Factor - WaterInflow[i] +
+#               model.Overflow[i] <= model.DamBalance_Start)
+#    else:
+#        return(model.PowerGeneratingWater[i] + DemandWater[i] *
+#               DemandWater_Factor - WaterInflow[i] +
+#               model.Overflow[i] <= model.DamBalance[i])
 #
-#model.DamEndLvl = Constraint(model.T, rule=DamEndLvl_rule)
+##model.GenerationWaterLimit = Constraint(model.T, rule=GenerationWaterLimit_rule)
+
+
+# Same Storage in the End level like @ hour 1
+def DamEndLvl_rule(model, i):
+    return(model.DamBalance[8759] == model.DamBalance_Start)
+
+model.DamEndLvl = Constraint(model.T, rule=DamEndLvl_rule)
 
 # ------SOLVER---------
 solver = ('gurobi')
@@ -227,8 +231,8 @@ Results.to_csv('output.csv', sep = ";", decimal=",")
 # ------------Plotting------------
 #==============================================================================
 
-AnzeigeAnfang = 0 #int(input("Ab welcher Stunde möchtest du die Werte ansehen: "))
-AnzeigeEnde = 8760 #int(input("Bis welcher Stunde möchtest du die Werte ansehen: "))
+AnzeigeAnfang = 800 #int(input("Ab welcher Stunde möchtest du die Werte ansehen: "))
+AnzeigeEnde = 1200 #int(input("Bis welcher Stunde möchtest du die Werte ansehen: "))
 
 ResultsGraph = Results[AnzeigeAnfang:AnzeigeEnde]
 demand = ResultsGraph['Energy Demand']
@@ -261,6 +265,21 @@ plt.savefig('graphical_output/energy.pdf', dpi=150)
 ResultsGraph['Overflow'].plot(label='Overflow')
 ResultsGraph.to_csv('selection.csv', sep = ";", decimal=",")
 
+#fig = plt.figure()
+#river = ResultsGraph['River']
+#z1 = ResultsGraph['Turbine Water']
+#z2 = z1 + ResultsGraph['Water Demand']
+#z3 = z2 + ResultsGraph['Overflow']
+#z4 = ResultsGraph['Water Balance']
+#fig2 = plt.figure()
+#ax3 = fig.add_subplot(111)
+#ax3.fill_between(ResultsGraph.Hour, 0, z1, label = 'PV', color = 'm', alpha=.7)
+#ax3.fill_between(ResultsGraph.Hour, z1, z2, label = 'Dam', color = 'g', alpha=.7)
+#ax3.fill_between(ResultsGraph.Hour, z2, z3, label = 'Wind', color = 'b', alpha=.7)
+#ax3.plot(ResultsGraph.Hour, river, label = 'Energy Demand', color = 'black')
+#
+#plt.savefig('graphical_output/energy2.pdf', dpi=150)
+
 #==============================================================================
 # ------------OUTPUT------------
 #==============================================================================
@@ -276,8 +295,9 @@ print("\n----INSTALLED---- \n"
       "----COST---- \n"
       "Wind:", "{:0,.2f}".format(model.Cwind * InstalledWind*LifeTimeWind), "€ total |", Cwind, "€ per MW installed \n"
       "PV:", "{:0,.2f}".format(model.Cpv * InstalledPV*LifeTimePv), "€ total |", Cpv, "€ per MW installed \n"
-      "Dam", "{:0,.2f}".format(sum((model.PowerGeneratingWater[i].value for i in model.T)) * Pdam * Cdam), "€ total |", Cdam, "€ per MWh used\n"
-      "Total:", "{:0,.2f}".format((model.Cwind * InstalledWind * LifeTimeWind + model.Cpv * InstalledPV *LifeTimePv+ sum((model.PowerGeneratingWater[i].value for i in model.T)) * Pdam * Cdam)), "€ \n")
+      "Dam", "{:0,.2f}".format(sum((model.PowerGeneratingWater[i].value for i in model.T)) * Pdam * 0), "€ total |", 0, "€ per MWh used\n"
+      "Total:", "{:0,.2f}".format((model.Cwind * InstalledWind * LifeTimeWind + model.Cpv * InstalledPV * LifeTimePv), "€ \n"))
 
-time = datetime.now() - start
-print('Problem solved in ' + str(time) + " using " + solver + " as solver.")
+duration = datetime.now() - start
+print('Problem solved in ' + str(duration) + " using " + solver + " as solver.")
+print("HIGH FIVE!")
