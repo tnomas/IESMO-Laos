@@ -53,7 +53,7 @@ Expensive = 9999999999
 
 # Demand
 DemandFactor_Energy = data['energy_demand_normed']
-DemandTotal_Energy = 71737.392  # MWh Total
+DemandTotal_Energy =  97236     # MWh Total
 
 # Costcalculation
 DemandEnergy = [(DemandTotal_Energy * DemandFactor_Energy[i]) for i in model.T]
