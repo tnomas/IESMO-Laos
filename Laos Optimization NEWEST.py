@@ -21,6 +21,8 @@ import time
 WaterFlowFactor = 5
 start = datetime.now()
 data = pd.read_csv('data.csv', header=0)
+inflow = data['riverflow_first']
+inflow = inflow.interpolate(method = 'linear')
 model = ConcreteModel()
 model.T = [i for i in range(0, 8760)]
 
@@ -44,7 +46,7 @@ LifeTimePv = 25
 StorageSize = 6240000  # m^3
 Pdam = 260  # MW
 FactorDam = 20547  # m^3 Water per MW
-WaterInflow = 0.01 * WaterFlowFactor * data['riverflow_absolut']
+WaterInflow = 0.01 * WaterFlowFactor * inflow #data['riverflow_absolut']
 Cdam = 0  # €/MWh
 DamBalance_Start = StorageSize / 2
 Expensive = 9999999999
@@ -92,7 +94,7 @@ model.Overflow = Var(model.T, domain=NonNegativeReals)
 # ------Objective Function-------
 # €/MW * MW + €/MW + m^3(gesamt) * MWh/m^3 * €/MWh, Ziel: Minimieren
 
-
+i = 0
 def obj_rule(model):
         return(model.Cwind * model.Pwind + model.Cpv * model.Ppv +
                sum(model.Pwind_Usage[i] for i in model.T) * model.Cwind_var +
@@ -105,7 +107,7 @@ model.cost = Objective(sense=minimize, rule=obj_rule)
 # ----CONSTRAINTS-------
 # Fullfil Demand
 def DemandEnergy_rule(model, i):
-    return (model.Pwind_Usage[i] + model.Ppv_Usage[i] + + model.Pdam[i] == DemandEnergy[i])
+    return (model.Pwind_Usage[i] + model.Ppv_Usage[i] + model.Pdam[i] == DemandEnergy[i])
 
 model.EnergyDemand = Constraint(model.T, rule=DemandEnergy_rule)
 
