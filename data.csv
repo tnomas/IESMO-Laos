@@ -1,4 +1,4 @@
-hours,riverflow_absolut,riverflow_normed,riverflow_first,energy_demand_normed,windfactor,pvfactor,water_demand_normed,water_demand_absolut
+hours,riverflow_absolut,riverflow_normed,riverflow_first,energy_d_normed,windfactor,pvfactor,water_d_normed,water_d_absolut
 1,1529431.498,3.26805624372392E-05,1529431.498,7.80748E-05,0.072133333333333,0,8.0261975086683E-05,3642.0315911134
 2,1529431.498,3.26805624372392E-05,,8.06346E-05,0.138266666666667,0,5.73299822047736E-05,2601.45113650957
 3,1529431.498,3.26805624372392E-05,,8.70342E-05,0.0796,0,4.35707864756279E-05,1977.10286374727
