@@ -21,10 +21,7 @@ print('Wait...')
 # =============================================================================
 
 # Incentives
-Prio_Wind = 3  # incentive to use P_Dam over P_Wind
-Prio_PV = 3  # incentive to use P_Dam over P_Pv
-Prio_Dam = 1  # incentive to use P_Dam first
-Prio_Sto = 0.000000000000001
+Prio_Valve = 99999
 Avoid = 99999999  # incentive to avoid
 
 # Wind
@@ -62,10 +59,7 @@ m.C_Wind = Param(initialize=C_Wind)
 m.C_Pv = Param(initialize=C_Pv)
 m.Sto_Size = Param(initialize=Sto_Size)
 m.Sto_Start = Param(initialize=Sto_Start)
-m.Prio_Wind = Param(initialize=Prio_Wind)
-m.Prio_PV = Param(initialize=Prio_PV)
-m.Prio_Dam = Param(initialize=Prio_Dam)
-m.Prio_Sto = Param(initialize=Prio_Sto)
+m.Prio_Valve = Param(initialize=Prio_Valve)
 m.Avoid = Param(initialize=Avoid)
 
 # Variablen
@@ -87,11 +81,8 @@ m.Valve = Var(m.T, domain=NonNegativeReals)  # Valve to release stored water
 # ------Objective Function------
 def obj_rule(m):
         return(m.C_Wind * m.P_Wind + m.C_Pv * m.P_Pv +
-               sum(m.P_Wind_Usage[i] for i in m.T) * m.Prio_Wind +
-               sum(m.P_Pv_Usage[i] for i in m.T) * m.Prio_PV +
-               sum(m.P_Water[i] for i in m.T)/Factor_Dam * m.Prio_Dam +
-               sum((m.P_Pv_Over[i] + m.P_Wind_Over[i]) for i in m.T) * m.Avoid-
-               sum((m.Sto_Balance[i] * m.Prio_Sto) for i in m.T))
+               sum((m.P_Pv_Over[i] + m.P_Wind_Over[i]) for i in m.T) * m.Avoid+
+               sum((m.Valve[i]) for i in m.T) * m.Prio_Valve)
 
 m.min = Objective(sense=minimize, rule=obj_rule)
 
@@ -187,7 +178,7 @@ Results = pd.DataFrame({"Hour": pd.Series(m.T),
                                  'PV Usage', 'PV Over', 'Dam Output',
                                  'Storage', 'Turbine Water', 'River',
                                  'Water Balance', 'Valve', 'Installed Wind',
-                                 'Installed PV'])
+                                 'Installed PV', 'Valve_nan'])
 
 Results = (np.round(Results, decimals=2))
 Results.to_csv('output.csv', sep=";", decimal=",")
@@ -196,30 +187,21 @@ Results.to_csv('output.csv', sep=";", decimal=",")
 # ------------Plotting------------
 # =============================================================================
 
-Graph_Start = 0
-Graph_End = 8760
+Graph_Start = 1800
+Graph_End = 1986
 
-<<<<<<< HEAD
-def zero_to_nan(values):
-    return [float('nan') if x==0 else x for x in values]
-
-Valve_nan = zero_to_nan(Valve)
-
-ResultsGraph = Results[AnzeigeAnfang:AnzeigeEnde]
-=======
 ResultsGraph = Results[Graph_Start:Graph_End]
->>>>>>> 5c15d7e44f24f4111e411cd71686f99a4eb250bc
 demand = ResultsGraph['Energy Demand']
 y1 = ResultsGraph['Dam Output']
 y2 = y1 + ResultsGraph['PV Usage']
 y3 = y2 + ResultsGraph['Wind Usage']
 y4 = ResultsGraph['Storage']
-y5 = y4+Valve_nan
+y5 = ResultsGraph['Valve']
 
 fig = plt.figure()
 ax = fig.add_subplot(211)
-ax.fill_between(ResultsGraph.Hour, 0, y1, label='Dam', color='m', alpha=.7)
-ax.fill_between(ResultsGraph.Hour, y1, y2, label='PV', color='g', alpha=.7)
+ax.fill_between(ResultsGraph.Hour, 0, y1, label='Dam', color='g', alpha=.7)
+ax.fill_between(ResultsGraph.Hour, y1, y2, label='PV', color='y', alpha=.7)
 ax.fill_between(ResultsGraph.Hour, y2, y3, label='Wind', color='b', alpha=.7)
 ax.plot(ResultsGraph.Hour, demand, label='Energy Demand', color='black')
 ax.set_ylabel('[MW]')
@@ -228,8 +210,8 @@ box = ax.get_position()
 ax.set_position([box.x0, box.y0 + box.height * 0.1,
                  box.width, box.height * 0.9])
 
-plt.legend(fontsize='small', loc='upper center', bbox_to_anchor=(0.5, -0.15),
-           fancybox=True, ncol=5)
+plt.legend(fontsize='small', loc='upper center', bbox_to_anchor=(0.5, 1.3),
+           fancybox=True, ncol=4)
 
 ax2 = fig.add_subplot(212)
 ax2.fill_between(ResultsGraph.Hour, 0, y4, label='Storage',
