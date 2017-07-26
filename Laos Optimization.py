@@ -28,9 +28,10 @@ print('Wait...')
 # =============================================================================
 
 # Incentives
-Prio_Wind = 2  # incentive to use P_Dam over P_Wind
-Prio_PV = 2  # incentive to use P_Dam over P_Pv
+Prio_Wind = 3  # incentive to use P_Dam over P_Wind
+Prio_PV = 3  # incentive to use P_Dam over P_Pv
 Prio_Dam = 1  # incentive to use P_Dam first
+Prio_Sto = 0.000000000000001
 Avoid = 99999999  # incentive to avoid
 
 # Wind
@@ -41,7 +42,7 @@ Lt_Wind = 20  # Lifetime of wind turbines [a]
 # PV
 C_Pv = 37120  # Cost PV [€/MWp/a]
 Factor_Pv = data['pvfactor']  # Radiation factor (t) []
-Lt_Pv = 25  # Lifetime of PV modules [a]
+Lt_Pv = 22  # Lifetime of PV modules [a]
 
 # Dam
 P_Dam = 260  # Max possible turbine power[MW]
@@ -71,6 +72,7 @@ m.Sto_Start = Param(initialize=Sto_Start)
 m.Prio_Wind = Param(initialize=Prio_Wind)
 m.Prio_PV = Param(initialize=Prio_PV)
 m.Prio_Dam = Param(initialize=Prio_Dam)
+m.Prio_Sto = Param(initialize=Prio_Sto)
 m.Avoid = Param(initialize=Avoid)
 
 # Variablen
@@ -95,7 +97,8 @@ def obj_rule(m):
                sum(m.P_Wind_Usage[i] for i in m.T) * m.Prio_Wind +
                sum(m.P_Pv_Usage[i] for i in m.T) * m.Prio_PV +
                sum(m.P_Water[i] for i in m.T)/Factor_Dam * m.Prio_Dam +
-               sum((m.P_Pv_Over[i] + m.P_Wind_Over[i]) for i in m.T) * m.Avoid)
+               sum((m.P_Pv_Over[i] + m.P_Wind_Over[i]) for i in m.T) * m.Avoid-
+               sum((m.Sto_Balance[i] * m.Prio_Sto) for i in m.T))
 
 m.cost = Objective(sense=minimize, rule=obj_rule)
 
@@ -203,13 +206,18 @@ Results.to_csv('output.csv', sep=";", decimal=",")
 AnzeigeAnfang = 0
 AnzeigeEnde = 8760
 
+def zero_to_nan(values):
+    return [float('nan') if x==0 else x for x in values]
+
+Valve_nan = zero_to_nan(Valve)
+
 ResultsGraph = Results[AnzeigeAnfang:AnzeigeEnde]
 demand = ResultsGraph['Energy Demand']
 y1 = ResultsGraph['Dam Output']
 y2 = y1 + ResultsGraph['PV Usage']
 y3 = y2 + ResultsGraph['Wind Usage']
 y4 = ResultsGraph['Storage']
-y5 = ResultsGraph['Valve']
+y5 = y4+Valve_nan
 
 fig = plt.figure()
 ax = fig.add_subplot(211)
