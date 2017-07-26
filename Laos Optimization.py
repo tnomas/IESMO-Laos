@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jul 13 17:52:14 2017
-@author: nilshoffmann
-"""
-
 from pyomo.environ import ConcreteModel, Param, Var, Constraint, Objective
 from pyomo.environ import minimize, NonNegativeReals
 from pyomo.opt import SolverFactory
@@ -97,7 +90,7 @@ def obj_rule(m):
                sum(m.P_Water[i] for i in m.T)/Factor_Dam * m.Prio_Dam +
                sum((m.P_Pv_Over[i] + m.P_Wind_Over[i]) for i in m.T) * m.Avoid)
 
-m.cost = Objective(sense=minimize, rule=obj_rule)
+m.min = Objective(sense=minimize, rule=obj_rule)
 
 
 # ------CONSTRAINTS------
@@ -200,10 +193,10 @@ Results.to_csv('output.csv', sep=";", decimal=",")
 # ------------Plotting------------
 # =============================================================================
 
-AnzeigeAnfang = 0
-AnzeigeEnde = 8760
+Graph_Start = 0
+Graph_End = 8760
 
-ResultsGraph = Results[AnzeigeAnfang:AnzeigeEnde]
+ResultsGraph = Results[Graph_Start:Graph_End]
 demand = ResultsGraph['Energy Demand']
 y1 = ResultsGraph['Dam Output']
 y2 = y1 + ResultsGraph['PV Usage']
@@ -236,6 +229,7 @@ plt.xlabel('Hours')
 plt.savefig('graphical_output/energy.pdf', dpi=150)
 
 ResultsGraph.to_csv('selection.csv', sep=";", decimal=",")
+ResultsGraph.to_csv('alternative.csv')
 
 # ==============================================================================
 # ------------OUTPUT------------
