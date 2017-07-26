@@ -150,16 +150,20 @@ results = opt.solve(m, tee=True)
 # =============================================================================
 # ------------Results------------
 # =============================================================================
+
+P_Wind_Inst = [m.P_Wind.value for i in m.T]
 P_Wind_Out = [(Factor_Wind[i]*m.P_Wind.value) for i in m.T]
 P_Wind_Usage = [m.P_Wind_Usage[i].value for i in m.T]
 P_Wind_Over = [m.P_Wind_Over[i].value for i in m.T]
+P_Pv_Inst = [m.P_Pv.value for i in m.T]
 P_Pv_Out = [(Factor_Pv[i]*m.P_Pv.value) for i in m.T]
 P_Pv_Usage = [m.P_Pv_Usage[i].value for i in m.T]
 P_Pv_Over = [m.P_Pv_Over[i].value for i in m.T]
-P_Dam = [(m.P_Water[i].value/Factor_Dam) for i in m.T]
+P_Dam_Out = [(m.P_Water[i].value/Factor_Dam) for i in m.T]
 Used_P_Water = [m.P_Water[i].value for i in m.T]
 Storage = [m.Sto_Balance[i].value for i in m.T]
-WaterBalance = [(WaterInflow[i] - m.P_Water[i].value - Demand_W[i]) for i in m.T]
+WaterBalance = [(WaterInflow[i] - m.P_Water[i].value -
+                 Demand_W[i]) for i in m.T]
 Valve = [m.Valve[i].value for i in m.T]
 
 Results = pd.DataFrame({"Hour": pd.Series(m.T),
@@ -168,96 +172,91 @@ Results = pd.DataFrame({"Hour": pd.Series(m.T),
                         "Factor Wind": pd.Series(Factor_Wind),
                         "Wind Output": pd.Series(P_Wind_Out),
                         "Wind Usage": pd.Series(P_Wind_Usage),
+                        "Wind Over": pd.Series(P_Wind_Over),
                         "Factor PV": pd.Series(Factor_Pv),
                         "PV Over": pd.Series(P_Pv_Over),
                         "PV Usage": pd.Series(P_Pv_Usage),
                         "PV Output": pd.Series(P_Pv_Out),
-                        "Wind Over": pd.Series(P_Wind_Over),
-                        "Dam Output": pd.Series(P_Dam),
+                        "Dam Output": pd.Series(P_Dam_Out),
                         "Turbine Water": pd.Series(Used_P_Water),
                         "Storage": pd.Series(Storage),
                         "River": pd.Series(WaterInflow),
                         "Water Balance": pd.Series(WaterBalance),
-                        "Valve": pd.Series(Valve)},
-                        columns=['Hour','Energy Demand','Wind Output','PV Output',
-                                 'Dam Output','Factor Wind','Factor PV','Storage',
-                                 'Turbine Water','Water Demand','River',
-                                 'Water Balance','Valve','PV Usage',
-                                 'PV Over','Wind Usage','Wind Over'])
-                        
-Results = (np.round(Results, decimals=2))  
-Results.to_csv('output.csv', sep = ";", decimal=",")
-#==============================================================================
-# ------------Plotting------------
-#==============================================================================
+                        "Valve": pd.Series(Valve),
+                        "Installed Wind": pd.Series(P_Wind_Inst),
+                        "Installed PV": pd.Series(P_Pv_Inst)},
+                        columns=['Hour', 'Energy Demand', 'Water Demand',
+                                 'Factor Wind', 'Wind Output', 'Wind Usage',
+                                 'Wind Over', 'Factor PV', 'PV Output',
+                                 'PV Usage', 'PV Over', 'Dam Output',
+                                 'Storage', 'Turbine Water', 'River',
+                                 'Water Balance', 'Valve', 'Installed Wind',
+                                 'Installed PV'])
 
-AnzeigeAnfang = 0 #int(input("Ab welcher Stunde möchtest du die Werte ansehen: "))
-AnzeigeEnde = 8760 #int(input("Bis welcher Stunde möchtest du die Werte ansehen: "))
+Results = (np.round(Results, decimals=2))
+Results.to_csv('output.csv', sep=";", decimal=",")
+
+# =============================================================================
+# ------------Plotting------------
+# =============================================================================
+
+AnzeigeAnfang = 0
+AnzeigeEnde = 8760
 
 ResultsGraph = Results[AnzeigeAnfang:AnzeigeEnde]
 demand = ResultsGraph['Energy Demand']
-y1 = ResultsGraph['PV Usage']
-y2 = y1 + ResultsGraph['Dam Output']
+y1 = ResultsGraph['Dam Output']
+y2 = y1 + ResultsGraph['PV Usage']
 y3 = y2 + ResultsGraph['Wind Usage']
 y4 = ResultsGraph['Storage']
-#y5 = y1 + ResultsGraph['Excess']
+y5 = ResultsGraph['Valve']
 
 fig = plt.figure()
 ax = fig.add_subplot(211)
-ax.fill_between(ResultsGraph.Hour, 0, y1, label = 'PV', color = 'm', alpha=.7)
-ax.fill_between(ResultsGraph.Hour, y1, y2, label = 'Dam', color = 'g', alpha=.7)
-ax.fill_between(ResultsGraph.Hour, y2, y3, label = 'Wind', color = 'b', alpha=.7)
-ax.plot(ResultsGraph.Hour, demand, label = 'Energy Demand', color = 'black')
+ax.fill_between(ResultsGraph.Hour, 0, y1, label='Dam', color='m', alpha=.7)
+ax.fill_between(ResultsGraph.Hour, y1, y2, label='PV', color='g', alpha=.7)
+ax.fill_between(ResultsGraph.Hour, y2, y3, label='Wind', color='b', alpha=.7)
+ax.plot(ResultsGraph.Hour, demand, label='Energy Demand', color='black')
 ax.set_ylabel('[MW]')
 ax.yaxis.set_label_position('left')
 box = ax.get_position()
-ax.set_position([box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9])
+ax.set_position([box.x0, box.y0 + box.height * 0.1,
+                 box.width, box.height * 0.9])
 
-plt.legend(fontsize = 'small', loc='upper center', bbox_to_anchor=(0.5, -0.15), fancybox=True, ncol=5)
+plt.legend(fontsize='small', loc='upper center', bbox_to_anchor=(0.5, -0.15),
+           fancybox=True, ncol=5)
 
 ax2 = fig.add_subplot(212)
-ax2.fill_between(ResultsGraph.Hour, y1, y4, label = 'Storage', color = 'orange', alpha=.7)
+ax2.fill_between(ResultsGraph.Hour, 0, y4, label='Storage',
+                 color='orange', alpha=.7)
+ax2.plot(ResultsGraph.Hour, y5, label='Valve', color='blue', alpha=.7)
 ax2.set_ylabel('[m^3]')
 plt.xlabel('Hours')
 
 plt.savefig('graphical_output/energy.pdf', dpi=150)
 
-ResultsGraph['Valve'].plot(label='Valve')
-ResultsGraph.to_csv('selection.csv', sep = ";", decimal=",")
+ResultsGraph.to_csv('selection.csv', sep=";", decimal=",")
 
-#fig = plt.figure()
-#river = ResultsGraph['River']
-#z1 = ResultsGraph['Turbine Water']
-#z2 = z1 + ResultsGraph['Water Demand']
-#z3 = z2 + ResultsGraph['Valve']
-#z4 = ResultsGraph['Water Balance']
-#fig2 = plt.figure()
-#ax3 = fig.add_subplot(111)
-#ax3.fill_between(ResultsGraph.Hour, 0, z1, label = 'PV', color = 'm', alpha=.7)
-#ax3.fill_between(ResultsGraph.Hour, z1, z2, label = 'Dam', color = 'g', alpha=.7)
-#ax3.fill_between(ResultsGraph.Hour, z2, z3, label = 'Wind', color = 'b', alpha=.7)
-#ax3.plot(ResultsGraph.Hour, river, label = 'Energy Demand', color = 'black')
-#
-#plt.savefig('graphical_output/energy2.pdf', dpi=150)
-
-#==============================================================================
+# ==============================================================================
 # ------------OUTPUT------------
-#==============================================================================
+# ==============================================================================
+
 print(np.round(Results, decimals=2))
 
-InstalledWind = round(m.P_Wind.value,2)
-InstalledPV = round(m.P_Pv.value, 2)
-print("\n----INSTALLED---- \n"
-      "Dam Capacity:", P_Dam, "MW \n"
-      "Wind installiert:", InstalledWind, "MW \n"
-      "PV installiert:", InstalledPV, "MW  \n"
-      "Für Stromgeneration benötigtes Wasser:", round(sum(m.P_Water[i].value for i in m.T),2), "m^3 \n\n"
-      "----COST---- \n"
-      "Wind:", "{:0,.2f}".format(m.C_Wind * InstalledWind*Lt_Wind), "€ total |", C_Wind, "€ per MW installed \n"
-      "PV:", "{:0,.2f}".format(m.C_Pv * InstalledPV*Lt_Pv), "€ total |", C_Pv, "€ per MW installed \n"
-      "Dam", "{:0,.2f}".format(sum((m.P_Water[i].value for i in m.T)) * P_Dam * 0), "€ total |", 0, "€ per MWh used\n"
-      "Total:", "{:0,.2f}".format((m.C_Wind * InstalledWind * Lt_Wind + m.C_Pv * InstalledPV * Lt_Pv), "€ \n"))
-
 duration = datetime.now() - start
-print('Problem solved in ' + str(duration) + " using " + solver + " as solver.")
-print("HIGH FIVE!")
+print("Problem solved in", str(duration), "using", solver, "as solver.\n"
+      "Results saved in 'output.csv'")
+
+InstalledWind = round(m.P_Wind.value, 2)
+InstalledPV = round(m.P_Pv.value, 2)
+print("\n----Installed Capacity---- \n"
+      "Dam:", P_Dam, "MW \n"
+      "Wind:", InstalledWind, "MW \n"
+      "PV:", InstalledPV, "MW  \n"
+      "\n----COST----\n"
+      "Wind:", "{:0,.2f}".format(C_Wind * InstalledWind * Lt_Wind), "€ total",
+      "|", C_Wind, "€ per MW installed \n"
+      "PV:", "{:0,.2f}".format(C_Pv * InstalledPV*Lt_Pv), "€ total |",
+      C_Pv, "€ per MW installed \n"
+      "Total:", "{:0,.2f}".format((C_Wind * InstalledWind * Lt_Wind + C_Pv *
+                     InstalledPV * Lt_Pv), "€ \n"))
