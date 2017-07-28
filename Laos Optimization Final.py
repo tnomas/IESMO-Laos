@@ -39,16 +39,21 @@ P_Dam = 260  # Max possible turbine power[MW]
 Factor_Dam = 20547  # Used water/MW turbine power [m^3/MW]
 Sto_Size = 6240000  # Storage capacity dam [m^3]
 Sto_Start = Sto_Size / 2  # Storage volume @ hour 0  [m^3]
-Factor_Inflow = 5  # Waterflow compared to 2017 [%]
+Factor_Inflow = 50  # Waterflow compared to 2017 [%]
 WaterInflow = 0.01 * Factor_Inflow * \
               data['riverflow_first'].interpolate(method='linear')
               # Water Inflow River (t) [m^3]
 
 # Demand
+Growth_Demand_E = 3
 Factor_Demand_E = data['energy_d_normed']  # Energy demand factor (t) []
 Total_Demand_E = 97236  # Energy demand total [MWh]
-Demand_E = [(Total_Demand_E * Factor_Demand_E[i]) for i in m.T]
-Demand_W = data['water_d_absolut']  # Water Demand (t) [m^3]
+Demand_E = [(Growth_Demand_E* Total_Demand_E* Factor_Demand_E[i]) for i in m.T]
+
+Growth_Demand_W = 3
+Total_Demand_W = 45501461 # Water demand total [m^3]
+Factor_Demand_W = data['water_d_normed']  # Water Demand (t) [m^3]
+Demand_W = [(Growth_Demand_W*Total_Demand_W * Factor_Demand_W[i]) for i in m.T]
 
 # =============================================================================
 # ------------MODEL CONSTRUCTION------------
@@ -177,8 +182,8 @@ Results = pd.DataFrame({"Hour": pd.Series(m.T),
                                  'Factor Wind', 'Wind Output', 'Wind Usage',
                                  'Wind Over', 'Factor PV', 'PV Output',
                                  'PV Usage', 'PV Over', 'Dam Output',
-                                 'Storage', 'Turbine Water', 'River', 'Valve',
-                                 'Water Balance', 'Installed Wind',
+                                 'Storage', 'Turbine Water', 'River',
+                                 'Water Balance', 'Valve', 'Installed Wind',
                                  'Installed PV'])
 
 Results = (np.round(Results, decimals=2))
@@ -189,7 +194,7 @@ Results.to_csv('output.csv', sep=";", decimal=",")
 # =============================================================================
 
 Graph_Start = 0
-Graph_End = 500
+Graph_End = 8760
 
 ResultsGraph = Results[Graph_Start:Graph_End]
 demand = ResultsGraph['Energy Demand']
