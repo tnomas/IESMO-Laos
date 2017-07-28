@@ -126,7 +126,7 @@ m.StorageCalc = Constraint(m.T, rule=storage_rule)
 # Storage @ hour 8759 = Storage @ hour 0
 def dam_end_rule(m, i):
     return(m.Sto_Balance[8759] == m.Sto_Start)
-#m.DamEndLvl = Constraint(m.T, rule=dam_end_rule)
+m.DamEndLvl = Constraint(m.T, rule=dam_end_rule)
 
 
 # ------SOLVER------
