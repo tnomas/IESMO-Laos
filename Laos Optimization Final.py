@@ -70,9 +70,9 @@ m.P_Pv = Var(domain=NonNegativeReals)  # installed MW Pv
 m.P_Pv_Usage = Var(m.T, domain=NonNegativeReals)
 m.P_Pv_Over = Var(m.T, domain=NonNegativeReals)
 m.P_Dam = Var(m.T, bounds=(0, P_Dam))
-m.P_Water = Var(m.T, domain=NonNegativeReals)  # used Water for Power
-m.Sto_Balance = Var(m.T, bounds=(0, Sto_Size))  # Storage lvl @ each hour
-m.Valve = Var(m.T, domain=NonNegativeReals)  # Valve to release stored water
+m.V_Water = Var(m.T, domain=NonNegativeReals)  # used Water for Power
+m.V_Storage = Var(m.T, bounds=(0, Sto_Size))  # Storage lvl @ each hour
+m.V_Valve = Var(m.T, domain=NonNegativeReals)  # Valve to release stored water
 
 # =============================================================================
 # ----------Constraint & Objective & Solver------------
@@ -82,7 +82,7 @@ m.Valve = Var(m.T, domain=NonNegativeReals)  # Valve to release stored water
 def obj_rule(m):
         return(m.C_Wind * m.P_Wind + m.C_Pv * m.P_Pv +
                sum((m.P_Pv_Over[i] + m.P_Wind_Over[i]) for i in m.T) * m.Avoid_RE+
-               sum((m.Valve[i]) for i in m.T) * m.Avoid_Valve)
+               sum((m.V_Valve[i]) for i in m.T) * m.Avoid_Valve)
 
 m.min = Objective(sense=minimize, rule=obj_rule)
 
@@ -96,7 +96,7 @@ m.EnergyDemand = Constraint(m.T, rule=demand_energy_rule)
 
 # Turbine Capacity Limit
 def turbine_limitation_rule(m, i):
-    return(m.P_Water[i] == m.P_Dam[i] * Factor_Dam)
+    return(m.V_Water[i] == m.P_Dam[i] * Factor_Dam)
 m.TurbineLmt = Constraint(m.T, rule=turbine_limitation_rule)
 
 
@@ -115,17 +115,17 @@ m.MaxPvP = Constraint(m.T, rule=pv_rule)
 # Storage Calculation
 def storage_rule(m, i):
     if i == 0:
-        return(m.Sto_Balance[i] == m.Sto_Start - WaterInflow[i] -
-               m.P_Water[i] - Demand_W[i] - m.Valve[i])
+        return(m.V_Storage[i] == m.Sto_Start - WaterInflow[i] -
+               m.V_Water[i] - Demand_W[i] - m.V_Valve[i])
     else:
-        return(m.Sto_Balance[i] == m.Sto_Balance[i-1] + WaterInflow[i] -
-               m.P_Water[i] - Demand_W[i] - m.Valve[i])
+        return(m.V_Storage[i] == m.V_Storage[i-1] + WaterInflow[i] -
+               m.V_Water[i] - Demand_W[i] - m.V_Valve[i])
 m.StorageCalc = Constraint(m.T, rule=storage_rule)
 
 
 # Storage @ hour 8759 = Storage @ hour 0
 def dam_end_rule(m, i):
-    return(m.Sto_Balance[8759] == m.Sto_Start)
+    return(m.V_Storage[8759] == m.Sto_Start)
 m.DamEndLvl = Constraint(m.T, rule=dam_end_rule)
 
 
@@ -147,12 +147,12 @@ P_Pv_Inst = [m.P_Pv.value for i in m.T]
 P_Pv_Out = [(Factor_Pv[i]*m.P_Pv.value) for i in m.T]
 P_Pv_Usage = [m.P_Pv_Usage[i].value for i in m.T]
 P_Pv_Over = [m.P_Pv_Over[i].value for i in m.T]
-P_Dam_Out = [(m.P_Water[i].value/Factor_Dam) for i in m.T]
-Used_P_Water = [m.P_Water[i].value for i in m.T]
-Storage = [m.Sto_Balance[i].value for i in m.T]
-WaterBalance = [(WaterInflow[i] - m.P_Water[i].value -
+P_Dam_Out = [(m.V_Water[i].value/Factor_Dam) for i in m.T]
+Used_V_Water = [m.V_Water[i].value for i in m.T]
+Storage = [m.V_Storage[i].value for i in m.T]
+WaterBalance = [(WaterInflow[i] - m.V_Water[i].value -
                  Demand_W[i]) for i in m.T]
-Valve = [m.Valve[i].value for i in m.T]
+Valve = [m.V_Valve[i].value for i in m.T]
 
 Results = pd.DataFrame({"Hour": pd.Series(m.T),
                         "Energy Demand": pd.Series(Demand_E),
@@ -166,7 +166,7 @@ Results = pd.DataFrame({"Hour": pd.Series(m.T),
                         "PV Usage": pd.Series(P_Pv_Usage),
                         "PV Output": pd.Series(P_Pv_Out),
                         "Dam Output": pd.Series(P_Dam_Out),
-                        "Turbine Water": pd.Series(Used_P_Water),
+                        "Turbine Water": pd.Series(Used_V_Water),
                         "Storage": pd.Series(Storage),
                         "River": pd.Series(WaterInflow),
                         "Water Balance": pd.Series(WaterBalance),
