@@ -115,7 +115,8 @@ m.MaxPvP = Constraint(m.T, rule=pv_rule)
 # Storage Calculation
 def storage_rule(m, i):
     if i == 0:
-        return(m.Sto_Balance[i] == m.Sto_Start - m.Valve[i])
+        return(m.Sto_Balance[i] == m.Sto_Start - WaterInflow[i] -
+               m.P_Water[i] - Demand_W[i] - m.Valve[i])
     else:
         return(m.Sto_Balance[i] == m.Sto_Balance[i-1] + WaterInflow[i] -
                m.P_Water[i] - Demand_W[i] - m.Valve[i])
@@ -125,7 +126,7 @@ m.StorageCalc = Constraint(m.T, rule=storage_rule)
 # Storage @ hour 8759 = Storage @ hour 0
 def dam_end_rule(m, i):
     return(m.Sto_Balance[8759] == m.Sto_Start)
-m.DamEndLvl = Constraint(m.T, rule=dam_end_rule)
+#m.DamEndLvl = Constraint(m.T, rule=dam_end_rule)
 
 
 # ------SOLVER------
@@ -176,9 +177,9 @@ Results = pd.DataFrame({"Hour": pd.Series(m.T),
                                  'Factor Wind', 'Wind Output', 'Wind Usage',
                                  'Wind Over', 'Factor PV', 'PV Output',
                                  'PV Usage', 'PV Over', 'Dam Output',
-                                 'Storage', 'Turbine Water', 'River',
-                                 'Water Balance', 'Valve', 'Installed Wind',
-                                 'Installed PV', 'Valve_nan'])
+                                 'Storage', 'Turbine Water', 'River', 'Valve',
+                                 'Water Balance', 'Installed Wind',
+                                 'Installed PV'])
 
 Results = (np.round(Results, decimals=2))
 Results.to_csv('output.csv', sep=";", decimal=",")
@@ -187,8 +188,8 @@ Results.to_csv('output.csv', sep=";", decimal=",")
 # ------------Plotting------------
 # =============================================================================
 
-Graph_Start = 1800
-Graph_End = 1986
+Graph_Start = 0
+Graph_End = 500
 
 ResultsGraph = Results[Graph_Start:Graph_End]
 demand = ResultsGraph['Energy Demand']
