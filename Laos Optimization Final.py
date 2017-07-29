@@ -37,10 +37,10 @@ Lt_Pv = parameter.loc['Lt_Pv','value']  # Lifetime of PV modules [a]
 
 # Dam
 P_Dam = parameter.loc['P_Dam','value']  # Max possible turbine power[MW]
-Factor_Dam = parameter.loc['Factor_Dam','value']  # Used water/MW turbine power [m^3/MW]
+Factor_Dam = parameter.loc['Factor_Dam','value']  # water usage per MW [m^3/MW]
 Sto_Size = parameter.loc['Sto_Size','value']  # Storage capacity dam [m^3]
 Sto_Start = Sto_Size / 2  # Storage volume @ hour 0  [m^3]
-Factor_Inflow = parameter.loc['Factor_inflow','value']  # Waterflow compared to 2017 [%]
+Factor_Inflow = parameter.loc['Factor_inflow','value']  # factor to 2017 [%]
 WaterInflow = 0.01 * Factor_Inflow * \
               data['riverflow_first'].interpolate(method='linear')
               # Water Inflow River (t) [m^3]
@@ -48,11 +48,11 @@ WaterInflow = 0.01 * Factor_Inflow * \
 # Demand
 Growth_Demand_E = parameter.loc['Growth_Demand_E','value']
 Factor_Demand_E = data['energy_d_normed']  # Energy demand factor (t) []
-Total_Demand_E = parameter.loc['Total_Demand_E','value']  # Energy demand total [MWh]
+Total_Demand_E = parameter.loc['Total_Demand_E','value'] # Energy demand[MWh/a]
 Demand_E = [(Growth_Demand_E* Total_Demand_E* Factor_Demand_E[i]) for i in m.T]
 
 Growth_Demand_W = parameter.loc['Growth_Demand_W','value']
-Total_Demand_W = parameter.loc['Total_Demand_W','value'] # Water demand total [m^3]
+Total_Demand_W = parameter.loc['Total_Demand_W','value'] # Water demand [m^3/a]
 Factor_Demand_W = data['water_d_normed']  # Water Demand (t) [m^3]
 Demand_W = [(Growth_Demand_W*Total_Demand_W * Factor_Demand_W[i]) for i in m.T]
 
@@ -232,9 +232,9 @@ plt.savefig('graphical_output/energy.pdf', dpi=150)
 ResultsGraph.to_csv('selection.csv', sep=";", decimal=",")
 ResultsGraph.to_csv('alternative.csv')
 
-# ==============================================================================
+# =============================================================================
 # ------------OUTPUT------------
-# ==============================================================================
+# =============================================================================
 
 print(np.round(Results, decimals=2))
 
