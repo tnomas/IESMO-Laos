@@ -32,7 +32,7 @@ Lt_Wind = 20  # Lifetime of wind turbines [a]
 # PV
 C_Pv = 37120  # Cost PV [€/MWp/a]
 Factor_Pv = data['pvfactor']  # Radiation factor (t) []
-Lt_Pv = 22  # Lifetime of PV modules [a]
+Lt_Pv = 25  # Lifetime of PV modules [a]
 
 # Dam
 P_Dam = 260  # Max possible turbine power[MW]
