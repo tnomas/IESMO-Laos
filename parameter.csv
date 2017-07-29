@@ -1,0 +1,15 @@
+name,value
+Avoid_Valve,99999
+Avoid_RE,99999999
+C_Wind,77350
+Lt_Wind,20
+C_Pv,37120
+Lt_Pv,25
+P_Dam,260
+Factor_Dam,20547
+Sto_Size,6240000
+Factor_inflow,50
+Growth_Demand_E,3
+Total_Demand_E,97236
+Growth_Demand_W,3
+Total_Demand_W,45501461
