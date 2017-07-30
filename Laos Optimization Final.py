@@ -22,8 +22,9 @@ print('Wait...')
 # =============================================================================
 
 # Incentives
-Avoid_Valve = parameter.loc['Avoid_Valve','value']
-Avoid_RE = parameter.loc['Avoid_RE','value']  # incentive to Avoid_RE
+Avoid_EmptyStorage = 1
+Avoid_Valve = 99999
+Avoid_RE = 99999999  # incentive to Avoid_RE
 
 # Wind
 C_Wind = parameter.loc['C_Wind','value']  # Cost [Wind €/MW/a]
@@ -67,6 +68,7 @@ m.Sto_Size = Param(initialize=Sto_Size)
 m.Sto_Start = Param(initialize=Sto_Start)
 m.Avoid_Valve = Param(initialize=Avoid_Valve)
 m.Avoid_RE = Param(initialize=Avoid_RE)
+m.Avoid_EmptyStorage = Param(initialize=Avoid_EmptyStorage)
 
 # Variablen
 m.P_Wind = Var(domain=NonNegativeReals)  # installed MW Wind
@@ -88,7 +90,8 @@ m.V_Valve = Var(m.T, domain=NonNegativeReals)  # Valve to release stored water
 def obj_rule(m):
         return(m.C_Wind * m.P_Wind + m.C_Pv * m.P_Pv +
                sum((m.P_Pv_Over[i] + m.P_Wind_Over[i]) for i in m.T) * m.Avoid_RE+
-               sum((m.V_Valve[i]) for i in m.T) * m.Avoid_Valve)
+               sum((m.V_Valve[i]) for i in m.T) * m.Avoid_Valve -
+               sum((m.V_Storage[i]) for i in m.T) * m.Avoid_EmptyStorage)
 
 m.min = Objective(sense=minimize, rule=obj_rule)
 
