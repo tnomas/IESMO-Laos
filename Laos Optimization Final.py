@@ -22,7 +22,7 @@ print('Wait...')
 # =============================================================================
 
 # Incentives
-Avoid_EmptyStorage = 1
+Avoid_EmptyStorage = -1
 Avoid_Valve = 99999
 Avoid_RE = 99999999  # incentive to Avoid_RE
 
@@ -89,8 +89,8 @@ m.V_Valve = Var(m.T, domain=NonNegativeReals)  # Valve to release stored water
 # ------Objective Function------
 def obj_rule(m):
         return(m.C_Wind * m.P_Wind + m.C_Pv * m.P_Pv +
-               sum((m.P_Pv_Over[i] + m.P_Wind_Over[i]) for i in m.T) * m.Avoid_RE+
-               sum((m.V_Valve[i]) for i in m.T) * m.Avoid_Valve -
+               sum((m.P_Pv_Over[i] + m.P_Wind_Over[i]) for i in m.T) * m.Avoid_RE +
+               sum((m.V_Valve[i]) for i in m.T) * m.Avoid_Valve +
                sum((m.V_Storage[i]) for i in m.T) * m.Avoid_EmptyStorage)
 
 m.min = Objective(sense=minimize, rule=obj_rule)
