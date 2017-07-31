@@ -6,6 +6,7 @@ from pyomo.opt import SolverFactory
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
 from datetime import datetime
 
 # =============================================================================
@@ -224,6 +225,11 @@ y3 = y2 + ResultsGraph['Wind Usage']
 y4 = ResultsGraph['Storage']
 y5 = ResultsGraph['Valve']
 
+def millions(x, pos):
+    return '%1.1fM' % (x*1e-6)
+
+formatter = FuncFormatter(millions)
+
 fig = plt.figure()
 ax = fig.add_subplot(211)
 ax.fill_between(ResultsGraph.Hour, 0, y1, label='Dam', color='g', alpha=.7)
@@ -240,6 +246,7 @@ ax2.fill_between(ResultsGraph.Hour, 0, y4, label='Storage',
                  color='orange', alpha=.7)
 ax2.plot(ResultsGraph.Hour, y5, label='Valve', color='blue', alpha=.7)
 ax2.set_ylabel('[m^3]')
+ax2.yaxis.set_major_formatter(formatter)
 plt.xlabel('Hours')
 plt.legend(fontsize='small', loc='upper center', bbox_to_anchor=(0.81, -0.2),
            fancybox=True, ncol=4)
