@@ -207,7 +207,7 @@ Results = pd.DataFrame({"Hour": pd.Series(m.T),
                                 'Installed PV'])
 
 Results = (np.round(Results, decimals=2))
-Results.to_csv('output.csv', sep=";", decimal=",")
+Results.to_csv('output.csv')
 
 # =============================================================================
 # ------------Plotting------------
@@ -244,10 +244,7 @@ plt.xlabel('Hours')
 plt.legend(fontsize='small', loc='upper center', bbox_to_anchor=(0.81, -0.2),
            fancybox=True, ncol=4)
 
-plt.savefig('graphical_output/energy.pdf', dpi=150)
-
-ResultsGraph.to_csv('selection.csv', sep=";", decimal=",")
-ResultsGraph.to_csv('alternative.csv')
+plt.savefig('Overview_Plot.pdf', dpi=150)
 
 # =============================================================================
 # ------------OUTPUT------------
